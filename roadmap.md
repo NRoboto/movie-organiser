@@ -8,6 +8,10 @@
 
 #### REST API
 
+- **OMDb API Wrapper**
+  - Get movie info by plot (GET _"/movie?i=\<int\>"_)
+  - Store movie info in DB cache, retrieve from DB if exists, otherwise retrieve from OMDb
+  - Search for movie (GET _"/movie?s=\<string\>&type=\<movie|series\>&y=\<int\>"_)
 - **User CRUD operations** (_"/user"_)
   - Create new user (username, age, gender, location, password) (_POST "/user"_)
   - View profile (_GET "/user/:id" or "/user"_)
@@ -61,8 +65,10 @@
   - Delete list
   - Reorder by typing new index
   - Reorder by drag-and-drop
-- **Search page** (_"/search"_)
+- **Search lists page** (_"/search/list"_)
   - Same GET query string as for "Search list" CRUD operation
+- **Search movie page** (_"/search/movie"_)
+  - Same GET query string as for OMDb wrapper search
 - **Settings page** (_"/profile/settings"_)
   - Update details
   - Set information visibility
