@@ -9,9 +9,9 @@
 #### REST API
 
 - **OMDb API Wrapper**
-  - Get movie info by plot (GET _"/movie?i=\<int\>"_)
+  - Get movie info by ID (GET _"/movie?id=\<int\>"_)
   - Store movie info in DB cache, retrieve from DB if exists, otherwise retrieve from OMDb
-  - Search for movie (GET _"/movie?s=\<string\>&type=\<movie|series\>&y=\<int\>"_)
+  - Search for movie (GET _"/movie?query=\<string\>&type=\<movie|series\>&year=\<int\>"_)
 - **User CRUD operations** (_"/user"_)
   - Create new user (username, age, gender, location, password) (_POST "/user"_)
   - View profile (_GET "/user/:id" or "/user"_)
