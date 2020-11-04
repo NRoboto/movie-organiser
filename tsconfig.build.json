@@ -4,5 +4,5 @@
     "noEmit": false
   },
   "include": ["src/"],
-  "exclude": ["**/*.test.ts", "**/*.test.tsx"]
+  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/*.testutil.ts"]
 }

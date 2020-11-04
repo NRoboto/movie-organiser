@@ -1,4 +1,5 @@
-import { User } from "./user";
+import { User } from "./User";
+import { checkRequiredForDoc, writeWithDoc } from "./common.testutil";
 
 type UserDoc = {
   username?: string;
@@ -16,21 +17,8 @@ const userDoc: UserDoc = {
   location: "Norway",
 };
 
-const checkRequired = async (isRequired: boolean, field: keyof UserDoc) => {
-  const { [field]: _, ...doc } = userDoc;
-
-  if (isRequired) await expect(new User(doc).save()).rejects.toThrow();
-  else await expect(new User(doc).save()).resolves.toMatchObject(doc);
-};
-
-const writeUser = async (fieldReplacements?: { [x: string]: any }) => {
-  const doc = {
-    ...userDoc,
-    ...fieldReplacements,
-  };
-
-  return await new User(doc).save();
-};
+const checkRequired = checkRequiredForDoc(User, userDoc);
+const writeUser = writeWithDoc(User, userDoc);
 
 describe("User Model", () => {
   test("Has necessary data", () => {
@@ -123,7 +111,7 @@ describe("User Database", () => {
     });
   });
 
-  describe("Location", async () => {
+  describe("Location", () => {
     test("Not required", async () => {
       await checkRequired(false, "location");
     });
