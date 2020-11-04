@@ -1,4 +1,3 @@
-import request from "supertest";
 import mongoose from "mongoose";
 
 test("Should connect to database", async () => {
