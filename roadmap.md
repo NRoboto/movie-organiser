@@ -2,22 +2,35 @@
 
 ## Implemented
 
-## In Progress
-
-## Planned
-
 #### REST API
 
 - **OMDb API Wrapper**
   - Get movie info by ID (GET _"/movie?id=\<int\>"_)
-  - Store movie info in DB cache, retrieve from DB if exists, otherwise retrieve from OMDb
   - Search for movie (GET _"/movie?query=\<string\>&type=\<movie|series\>&year=\<int\>"_)
+
+#### Front End
+
+## In Progress
+
+#### REST API
+
 - **User CRUD operations** (_"/user"_)
   - Create new user (username, age, gender, location, password) (_POST "/user"_)
   - View profile (_GET "/user/:id" or "/user"_)
   - Change details (_PATCH "/user"_)
   - Delete account (_DELETE "/user"_)
   - Search users (_GET "/user?id=\<int\>&username=\<string\>&location=\<string\>"_)
+
+#### Front End
+
+## Planned
+
+#### REST API
+
+- **OMDb API Wrapper**
+  - Store movie info in DB cache, retrieve from DB if exists, otherwise retrieve from OMDb
+  - Implement pagination for searching
+- **User CRUD operations** (_"/user"_)
   - Add avatar (_POST "/user/avatar"_)
   - View avatar (_GET "/user/:id/avatar"_)
   - Create list (name, public/private, items array) (_POST "/user/list"_)
