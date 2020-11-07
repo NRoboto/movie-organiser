@@ -19,7 +19,7 @@
   - View profile (_GET "/user/:username" or "/user"_)
   - Change details (_PATCH "/user"_)
   - Delete account (_DELETE "/user"_)
-  - Search users (_GET "/user?id=\<int\>&username=\<string\>&location=\<string\>"_)
+  - Search users (_GET "/user?id=\<int\>&username=\<string\>&location=\<string\>&displayName=\<string\>"_)
 
 #### Front End
 
