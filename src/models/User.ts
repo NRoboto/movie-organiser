@@ -5,6 +5,7 @@ const filter = new Filter();
 
 type UserDocument = {
   username: string;
+  displayName?: string;
   password: string;
   gender: string;
   age: number;
@@ -23,6 +24,29 @@ const userSchema = new mongoose.Schema<UserDocument>(
       validate(value: string) {
         if (filter.isProfane(value))
           throw new Error("Username cannot contain profanity.");
+
+        return true;
+      },
+    },
+    displayName: {
+      type: String,
+      unique: true,
+      required: true,
+      minlength: 3,
+      maxlength: 20,
+      trim: true,
+      async validate(value: string) {
+        if (filter.isProfane(value))
+          throw new Error("Display name cannot contain profanity.");
+
+        const existingUser = await User.findOne({
+          username: value.toLowerCase(),
+        });
+
+        if (existingUser)
+          throw new Error(
+            `Display name cannot be the same as another user's username`
+          );
 
         return true;
       },
@@ -62,5 +86,13 @@ userSchema.methods.toJSON = function () {
 
   return user;
 };
+
+userSchema.pre<UserDocument>("save", function () {
+  const user = this;
+  if (user.isNew) {
+    user.displayName = user.username;
+    user.username = user.username.toLowerCase();
+  }
+});
 
 export const User = mongoose.model<UserDocument>("user", userSchema);
