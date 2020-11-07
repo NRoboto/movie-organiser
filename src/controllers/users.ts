@@ -76,6 +76,20 @@ export const updateUser: RequestHandler = async (req, res) => {
   }
 };
 
-export const deleteUser: RequestHandler = async (req, res) => {};
+export const deleteUser: RequestHandler = async (req, res) => {
+  // NOTE: Username in body should be ignored, instead it should be obtained from auth
+  const { username } = req.body;
+
+  try {
+    const deletedUser = await User.findOneAndDelete({ username });
+
+    if (!deletedUser)
+      return res.status(404).send({ error: `User "${username}" not found.` });
+
+    res.send(deletedUser);
+  } catch (error) {
+    res.status(500).send({ error: error.toString() });
+  }
+};
 
 export const searchUser: RequestHandler = async (req, res) => {};
