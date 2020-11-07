@@ -16,7 +16,7 @@
 
 - **User CRUD operations** (_"/user"_)
   - Create new user (username, age, gender, location, password) (_POST "/user"_)
-  - View profile (_GET "/user/:id" or "/user"_)
+  - View profile (_GET "/user/:username" or "/user"_)
   - Change details (_PATCH "/user"_)
   - Delete account (_DELETE "/user"_)
   - Search users (_GET "/user?id=\<int\>&username=\<string\>&location=\<string\>"_)
