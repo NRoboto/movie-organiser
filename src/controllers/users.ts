@@ -1,4 +1,5 @@
 import { RequestHandler } from "express";
+import { Types as mongooseTypes } from "mongoose";
 import { User } from "../models/User";
 
 export const createUser: RequestHandler = async (req, res) => {
@@ -92,4 +93,23 @@ export const deleteUser: RequestHandler = async (req, res) => {
   }
 };
 
-export const searchUser: RequestHandler = async (req, res) => {};
+export const searchUser: RequestHandler = async (req, res, next) => {
+  const { name, location } = req.query;
+
+  if (!name && !location) return next();
+
+  const getSearchRegex = (value: any) =>
+    value ? new RegExp(`.*${value}.*`, "i") : /.*/;
+  const nameRegex = getSearchRegex(name);
+
+  try {
+    const users = await User.find({
+      $or: [{ username: nameRegex }, { displayName: nameRegex }],
+      location: getSearchRegex(location),
+    });
+
+    res.send(users);
+  } catch (error) {
+    res.status(500).send({ error: error.toString() });
+  }
+};
