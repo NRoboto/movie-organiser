@@ -7,6 +7,13 @@
 - **OMDb API Wrapper**
   - Get movie info by ID (GET _"/movie?id=\<int\>"_)
   - Search for movie (GET _"/movie?query=\<string\>&type=\<movie|series\>&year=\<int\>"_)
+- **User CRUD operations** (_"/user"_)
+  - Create new user (username, age, gender, location, password) (_POST "/user"_)
+  - View profile (_GET "/user/:username" or "/user"_)
+  - Change details (_PATCH "/user"_)
+  - Delete account (_DELETE "/user"_)
+  - Search users (_GET "/user?name=\<string\>&location=\<string\>"_)
+    - name matches username and display name.
 
 #### Front End
 
@@ -14,12 +21,9 @@
 
 #### REST API
 
-- **User CRUD operations** (_"/user"_)
-  - Create new user (username, age, gender, location, password) (_POST "/user"_)
-  - View profile (_GET "/user/:username" or "/user"_)
-  - Change details (_PATCH "/user"_)
-  - Delete account (_DELETE "/user"_)
-  - Search users (_GET "/user?id=\<int\>&username=\<string\>&location=\<string\>&displayName=\<string\>"_)
+- **User Authentication**
+  - Login user (using username and password)
+    - Return JSWT
 
 #### Front End
 
@@ -39,8 +43,6 @@
   - Delete list (_DELETE "/user/list/:id"_)
   - Search lists (_GET "/lists?contains=\<\[string\]\>&createdBy=\<string\>&createdAt=\<string\>&sortBy=\<createdAt|modifiedAt|length|alphabetical\>\_\<asc|desc\>"_)
 - **User Authentication**
-  - Login user (using username and password)
-    - Return JSWT
   - View profile
     - Show public profile for other users/not logged in (public lists only, no location or age)
   - Only show private lists to owner
