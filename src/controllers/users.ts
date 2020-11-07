@@ -24,3 +24,26 @@ export const createUser: RequestHandler = async (req, res) => {
     res.status(500).send({ error });
   }
 };
+
+export const readUser: RequestHandler = async (req, res) => {
+  const username = req.params.username;
+
+  if (!username) {
+    // When auth is implemented, get own username from token
+    return res
+      .status(501)
+      .send({ error: "Authentication is not yet implemented" });
+  }
+
+  const user = await User.findOne({ username });
+  if (!user)
+    return res.status(404).send({ error: `User "${username}" not found.` });
+
+  res.send(user);
+};
+
+export const updateUser: RequestHandler = async (req, res) => {};
+
+export const deleteUser: RequestHandler = async (req, res) => {};
+
+export const searchUser: RequestHandler = async (req, res) => {};
