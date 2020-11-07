@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema<UserDocument>(
     displayName: {
       type: String,
       unique: true,
-      required: true,
+      required: false,
       minlength: 3,
       maxlength: 20,
       trim: true,
