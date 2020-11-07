@@ -3,7 +3,15 @@ import Filter from "bad-words";
 
 const filter = new Filter();
 
-const userSchema = new mongoose.Schema(
+type UserDocument = {
+  username: string;
+  password: string;
+  gender: string;
+  age: number;
+  location: string;
+} & mongoose.Document;
+
+const userSchema = new mongoose.Schema<UserDocument>(
   {
     username: {
       type: String,
@@ -45,4 +53,14 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-export const User = mongoose.model("user", userSchema);
+userSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+  delete user.updatedAt;
+  delete user.__v;
+  delete user._id;
+
+  return user;
+};
+
+export const User = mongoose.model<UserDocument>("user", userSchema);
