@@ -35,6 +35,8 @@
   - Store movie info in DB cache, retrieve from DB if exists, otherwise retrieve from OMDb
   - Implement pagination for searching
 - **User CRUD operations** (_"/user"_)
+  - Search users (_GET "/user?name=\<string\>&location=\<string\>"_)
+    - Pagination (_"&page=\<int\>&count=\<int=10\>"_)
   - Add avatar (_POST "/user/avatar"_)
   - View avatar (_GET "/user/:id/avatar"_)
   - Create list (name, public/private, items array) (_POST "/user/list"_)
