@@ -21,6 +21,24 @@ const userSchema = new mongoose_1.default.Schema({
             return true;
         },
     },
+    displayName: {
+        type: String,
+        unique: true,
+        required: false,
+        minlength: 3,
+        maxlength: 20,
+        trim: true,
+        async validate(value) {
+            if (filter.isProfane(value))
+                throw new Error("Display name cannot contain profanity.");
+            const existingUser = await exports.User.findOne({
+                username: value.toLowerCase(),
+            });
+            if (existingUser)
+                throw new Error(`Display name cannot be the same as another user's username`);
+            return true;
+        },
+    },
     password: {
         type: String,
         required: true,
@@ -43,5 +61,24 @@ const userSchema = new mongoose_1.default.Schema({
     },
 }, {
     timestamps: true,
+});
+userSchema.methods.toJSON = function () {
+    const user = this.toObject();
+    delete user.password;
+    delete user.updatedAt;
+    delete user.__v;
+    delete user._id;
+    return user;
+};
+userSchema.methods.isPassword = function (pass) {
+    const user = this;
+    return user.password === pass; // NOTE: Should use bcrypt
+};
+userSchema.pre("save", function () {
+    const user = this;
+    if (user.isNew) {
+        user.displayName = user.username;
+        user.username = user.username.toLowerCase();
+    }
 });
 exports.User = mongoose_1.default.model("user", userSchema);

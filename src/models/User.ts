@@ -10,6 +10,7 @@ type UserDocument = {
   gender: string;
   age: number;
   location: string;
+  isPassword: (pass: string) => boolean;
 } & mongoose.Document;
 
 const userSchema = new mongoose.Schema<UserDocument>(
@@ -85,6 +86,12 @@ userSchema.methods.toJSON = function () {
   delete user._id;
 
   return user;
+};
+
+userSchema.methods.isPassword = function (pass) {
+  const user = this;
+
+  return user.password === pass; // NOTE: Should use bcrypt
 };
 
 userSchema.pre<UserDocument>("save", function () {
