@@ -9,10 +9,12 @@ passport.use(
       const user = await User.findOne({ username });
 
       if (!user)
-        return done(null, false, { message: `User "${username}" not found.` });
+        return done(null, false, { message: "Invalid username or password" });
 
-      if (!user.isPassword(password))
-        return done(null, false, { message: `Incorrect password.` });
+      if (!user.isPassword(password)) {
+        console.log("Not correct password");
+        return done(null, false, { message: "Invalid username or password" });
+      }
 
       return done(null, user);
     } catch (error) {
@@ -31,7 +33,7 @@ passport.use(
       try {
         const user = await User.findById(jwt.sub);
 
-        if (!user) return done(null, false, { message: `User not found.` });
+        if (!user) return done(null, false, { message: "Invalid credentials" });
 
         return done(null, user);
       } catch (error) {

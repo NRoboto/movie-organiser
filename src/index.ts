@@ -6,6 +6,9 @@ import passport from "passport";
 import { initMongoose } from "./db/init";
 import { router } from "./router";
 
+// Setup passport
+import "./services/passport";
+
 const app = express();
 app.use(express.static(path.join(__dirname, "../public")));
 app.use(express.json());
