@@ -6,11 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const path_1 = __importDefault(require("path"));
 const express_1 = __importDefault(require("express"));
 const chalk_1 = __importDefault(require("chalk"));
+const passport_1 = __importDefault(require("passport"));
 const init_1 = require("./db/init");
 const router_1 = require("./router");
 const app = express_1.default();
 app.use(express_1.default.static(path_1.default.join(__dirname, "../public")));
 app.use(express_1.default.json());
+app.use(passport_1.default.initialize());
 app.use(router_1.router);
 init_1.initMongoose()
     .then((status) => {
