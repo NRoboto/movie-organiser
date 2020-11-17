@@ -11,3 +11,26 @@ export const signin: RequestHandler = async (req, res) => {
     token: req.user.createToken(),
   });
 };
+
+export const signup: RequestHandler = async (req, res, next) => {
+  const { username, password, gender, age, location } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (user) return res.status(422).send({ error: "Email already in use" });
+
+    const newUser = await new User({
+      username,
+      password,
+      gender,
+      age,
+      location,
+    }).save();
+
+    req.user = newUser;
+    return next();
+  } catch (error) {
+    res.status(500).send({ error: error.toString() });
+  }
+};

@@ -1,2 +1,2 @@
-export { User } from "./User";
+export { User, isUser } from "./User";
 export { Movie } from "./Movie";

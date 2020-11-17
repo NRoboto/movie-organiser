@@ -7,6 +7,7 @@ import {
   deleteUser,
   searchUser,
   signin,
+  signup,
   getMovies,
 } from "./controllers";
 
@@ -28,6 +29,7 @@ router.delete("/user", deleteUser);
 
 // Authentication
 router.post("/login", requireSignin, signin);
+router.post("/signup", signup, signin);
 
 // Movies
 router.get("/movie", getMovies);
