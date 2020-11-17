@@ -1,7 +1,6 @@
 import express from "express";
 import passport from "passport";
 import {
-  createUser,
   readUser,
   updateUser,
   deleteUser,
@@ -21,7 +20,6 @@ const requireSignin = passport.authenticate("local", {
 export const router = express.Router();
 
 // Users
-router.post("/user", createUser);
 router.get("/user/", searchUser, readUser); // If no search query params, searchUser will pass handling to readUser
 router.get("/user/:username", readUser);
 router.patch("/user", updateUser);
