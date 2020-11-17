@@ -13,6 +13,7 @@ type UserDocument = {
   location: string;
   isPassword: (pass: string) => boolean;
   createToken: () => string;
+  getPublicDocument: () => { [key: string]: string };
 } & mongoose.Document;
 
 const userSchema = new mongoose.Schema<UserDocument>(
@@ -83,9 +84,19 @@ const userSchema = new mongoose.Schema<UserDocument>(
 userSchema.methods.toJSON = function () {
   const user = this.toObject();
   delete user.password;
-  delete user.updatedAt;
   delete user.__v;
   delete user._id;
+
+  return user;
+};
+
+userSchema.methods.getPublicDocument = function () {
+  const user = this.toObject();
+  delete user.password;
+  delete user.__v;
+  delete user._id;
+  delete user.updatedAt;
+  delete user.age;
 
   return user;
 };
@@ -114,4 +125,4 @@ userSchema.pre<UserDocument>("save", function () {
 export const User = mongoose.model<UserDocument>("user", userSchema);
 
 export const isUser = (user: any): user is UserDocument =>
-  user.schema === User.schema;
+  user && user.schema === User.schema;

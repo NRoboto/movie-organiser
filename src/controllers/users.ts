@@ -1,23 +1,23 @@
 import { RequestHandler } from "express";
 import { Types as mongooseTypes } from "mongoose";
-import { User } from "../models/User";
+import { User, isUser } from "../models/User";
+
+export const readSelf: RequestHandler = async (req, res) => {
+  if (!isUser(req.user))
+    return res.status(500).send({ error: "User is not authenticated" });
+
+  res.send(req.user);
+};
 
 export const readUser: RequestHandler = async (req, res) => {
   const username = req.params.username;
-
-  if (!username) {
-    // When auth is implemented, get own username from token
-    return res
-      .status(501)
-      .send({ error: "Authentication is not yet implemented" });
-  }
 
   try {
     const user = await User.findOne({ username });
     if (!user)
       return res.status(404).send({ error: `User "${username}" not found.` });
 
-    res.send(user);
+    res.send(user.getPublicDocument());
   } catch (error) {
     res.status(500).send({ error });
   }
@@ -84,7 +84,7 @@ export const searchUser: RequestHandler = async (req, res, next) => {
       location: getSearchRegex(location),
     });
 
-    res.send(users);
+    res.send(users.map((user) => user.getPublicDocument()));
   } catch (error) {
     res.status(500).send({ error: error.toString() });
   }

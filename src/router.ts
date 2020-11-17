@@ -1,6 +1,7 @@
 import express from "express";
 import passport from "passport";
 import {
+  readSelf,
   readUser,
   updateUser,
   deleteUser,
@@ -20,7 +21,7 @@ const requireSignin = passport.authenticate("local", {
 export const router = express.Router();
 
 // Users
-router.get("/user/", searchUser, readUser); // If no search query params, searchUser will pass handling to readUser
+router.get("/user/", searchUser, requireAuth, readSelf); // If no search query params, searchUser will pass handling to readUser
 router.get("/user/:username", readUser);
 router.patch("/user", updateUser);
 router.delete("/user", deleteUser);
