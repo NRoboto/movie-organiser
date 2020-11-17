@@ -1,5 +1,4 @@
 import { RequestHandler } from "express";
-import jwt from "jsonwebtoken";
 import { User, isUser } from "../models";
 
 export const signin: RequestHandler = async (req, res) => {
