@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Filter from "bad-words";
+import jwt from "jsonwebtoken";
 
 const filter = new Filter();
 
@@ -11,6 +12,7 @@ type UserDocument = {
   age: number;
   location: string;
   isPassword: (pass: string) => boolean;
+  createToken: () => string;
 } & mongoose.Document;
 
 const userSchema = new mongoose.Schema<UserDocument>(
@@ -94,6 +96,13 @@ userSchema.methods.isPassword = function (pass) {
   return user.password === pass; // NOTE: Should use bcrypt
 };
 
+userSchema.methods.createToken = function () {
+  const user = this;
+
+  const iat = new Date().getTime();
+  return jwt.sign({ sub: user.id, iat }, process.env.JWT_SECRET!);
+};
+
 userSchema.pre<UserDocument>("save", function () {
   const user = this;
   if (user.isNew) {
@@ -103,3 +112,6 @@ userSchema.pre<UserDocument>("save", function () {
 });
 
 export const User = mongoose.model<UserDocument>("user", userSchema);
+
+export const isUser = (user: any): user is UserDocument =>
+  user.schema === User.schema;
