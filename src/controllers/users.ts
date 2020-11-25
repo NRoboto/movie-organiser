@@ -17,7 +17,8 @@ export const readUser: RequestHandler = async (req, res) => {
     if (!user)
       return res.status(404).send({ error: `User "${username}" not found.` });
 
-    res.send(user.getPublicDocument());
+    if (isUser(req.user) && req.user.username === username) res.send(user);
+    else res.send(user.getPublicDocument());
   } catch (error) {
     res.status(500).send({ error });
   }
@@ -25,11 +26,14 @@ export const readUser: RequestHandler = async (req, res) => {
 
 export const updateUser: RequestHandler = async (req, res) => {
   // NOTE: Username in body should be ignored, instead it should be obtained from auth
-  const { username, displayName, password, age, gender, location } = req.body;
+  const { displayName, password, age, gender, location } = req.body;
+
+  if (!isUser(req.user))
+    return res.status(500).send({ error: "User is not authenticated" });
 
   try {
     const user = await User.findOneAndUpdate(
-      { username },
+      { username: req.user.username },
       {
         displayName,
         password,
@@ -44,8 +48,7 @@ export const updateUser: RequestHandler = async (req, res) => {
       }
     );
 
-    if (!user)
-      return res.status(404).send({ error: `User "${username}" not found.` });
+    if (!user) return res.status(404).send({ error: `Invalid authentication` });
 
     res.send({ user });
   } catch (error) {
@@ -54,8 +57,10 @@ export const updateUser: RequestHandler = async (req, res) => {
 };
 
 export const deleteUser: RequestHandler = async (req, res) => {
-  // NOTE: Username in body should be ignored, instead it should be obtained from auth
-  const { username } = req.body;
+  if (!isUser(req.user))
+    return res.status(500).send({ error: "User is not authenticated" });
+
+  const username = req.user.username;
 
   try {
     const deletedUser = await User.findOneAndDelete({ username });

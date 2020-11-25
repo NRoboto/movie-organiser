@@ -23,8 +23,8 @@ export const router = express.Router();
 // Users
 router.get("/user/", searchUser, requireAuth, readSelf); // If no search query params, searchUser will pass handling to readUser
 router.get("/user/:username", readUser);
-router.patch("/user", updateUser);
-router.delete("/user", deleteUser);
+router.patch("/user", requireAuth, updateUser);
+router.delete("/user", requireAuth, deleteUser);
 
 // Authentication
 router.post("/login", requireSignin, signin);
