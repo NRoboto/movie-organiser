@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { Types as mongooseTypes } from "mongoose";
-import { User, isUser } from "../models/User";
+import { User, UserDocument, isUser } from "../models/User";
 
 export const readSelf: RequestHandler = async (req, res) => {
   if (!isUser(req.user))
@@ -26,29 +26,25 @@ export const readUser: RequestHandler = async (req, res) => {
 
 export const updateUser: RequestHandler = async (req, res) => {
   // NOTE: Username in body should be ignored, instead it should be obtained from auth
-  const { displayName, password, age, gender, location } = req.body;
+  const updatableFields: (keyof UserDocument)[] = [
+    "displayName",
+    "password",
+    "age",
+    "gender",
+    "location",
+  ];
 
   if (!isUser(req.user))
     return res.status(500).send({ error: "User is not authenticated" });
 
   try {
-    const user = await User.findOneAndUpdate(
-      { username: req.user.username },
-      {
-        displayName,
-        password,
-        age,
-        gender,
-        location,
-      },
-      {
-        new: true,
-        omitUndefined: true,
-        runValidators: true,
-      }
-    );
+    const updates: { [key in keyof UserDocument]?: any } = {};
+    for (const field of updatableFields) {
+      if (req.body[field]) updates[field] = req.body[field];
+    }
 
-    if (!user) return res.status(404).send({ error: `Invalid authentication` });
+    const user = Object.assign(req.user, updates);
+    user.save();
 
     res.send({ user });
   } catch (error) {

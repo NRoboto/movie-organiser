@@ -1,17 +1,18 @@
 import mongoose from "mongoose";
 import Filter from "bad-words";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 const filter = new Filter();
 
-type UserDocument = {
+export type UserDocument = {
   username: string;
   displayName?: string;
   password: string;
   gender: string;
   age: number;
   location: string;
-  isPassword: (pass: string) => boolean;
+  isPassword: (pass: string) => Promise<boolean>;
   createToken: () => string;
   getPublicDocument: () => { [key: string]: string };
 } & mongoose.Document;
@@ -101,10 +102,10 @@ userSchema.methods.getPublicDocument = function () {
   return user;
 };
 
-userSchema.methods.isPassword = function (pass) {
+userSchema.methods.isPassword = async function (pass) {
   const user = this;
 
-  return user.password === pass; // NOTE: Should use bcrypt
+  return await bcrypt.compare(pass, user.password);
 };
 
 userSchema.methods.createToken = function () {
@@ -114,12 +115,18 @@ userSchema.methods.createToken = function () {
   return jwt.sign({ sub: user.id, iat }, process.env.JWT_SECRET!);
 };
 
-userSchema.pre<UserDocument>("save", function () {
+userSchema.pre<UserDocument>("save", async function (next) {
   const user = this;
+
   if (user.isNew) {
     user.displayName = user.username;
     user.username = user.username.toLowerCase();
   }
+
+  if (user.isModified("password"))
+    user.password = await bcrypt.hash(user.password, 10);
+
+  next();
 });
 
 export const User = mongoose.model<UserDocument>("user", userSchema);
