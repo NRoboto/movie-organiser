@@ -2,6 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import { User } from "../models";
+import { TokenObject } from "../models/User";
 
 passport.use(
   new LocalStrategy({ session: false }, async (username, password, done) => {
@@ -27,9 +28,9 @@ passport.use(
       secretOrKey: process.env.JWT_SECRET,
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     },
-    async (jwt, done) => {
+    async (jwt: TokenObject, done) => {
       try {
-        const user = await User.findById(jwt.sub);
+        const user = await User.getByJwt(jwt);
 
         if (!user) return done(null, false, { message: "Invalid credentials" });
 

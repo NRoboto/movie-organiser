@@ -14,16 +14,17 @@
   - Delete account (_DELETE "/user"_)
   - Search users (_GET "/user?name=\<string\>&location=\<string\>"_)
     - name matches username and display name.
+- **User Authentication**
+  - Login user (using username and password)
+  - Return JSWT
+  - View profile
+    - Show public profile for other users/not logged in (public lists only, no location or age)
 
 #### Front End
 
 ## In Progress
 
 #### REST API
-
-- **User Authentication**
-  - Login user (using username and password)
-    - Return JSWT
 
 #### Front End
 
@@ -45,8 +46,6 @@
   - Delete list (_DELETE "/user/list/:id"_)
   - Search lists (_GET "/lists?contains=\<\[string\]\>&createdBy=\<string\>&createdAt=\<string\>&sortBy=\<createdAt|modifiedAt|length|alphabetical\>\_\<asc|desc\>"_)
 - **User Authentication**
-  - View profile
-    - Show public profile for other users/not logged in (public lists only, no location or age)
   - Only show private lists to owner
 - **Sharing**
   - Allow adding friends

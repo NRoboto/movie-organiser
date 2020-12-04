@@ -7,7 +7,7 @@ export const signin: RequestHandler = async (req, res) => {
   }
 
   res.send({
-    token: req.user.createToken(),
+    token: await req.user.createToken(),
   });
 };
 

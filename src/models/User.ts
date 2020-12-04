@@ -2,8 +2,28 @@ import mongoose from "mongoose";
 import Filter from "bad-words";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import isEqual from "lodash.isequal";
 
 const filter = new Filter();
+
+export type TokenObject = {
+  sub: string; // User ID
+  iat: Number;
+};
+
+type TokenSchema = { token: string };
+
+const tokenSchema = new mongoose.Schema(
+  {
+    token: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
 export type UserDocument = {
   username: string;
@@ -12,8 +32,9 @@ export type UserDocument = {
   gender: string;
   age: number;
   location: string;
+  tokens: TokenSchema[];
   isPassword: (pass: string) => Promise<boolean>;
-  createToken: () => string;
+  createToken: () => Promise<string>;
   getPublicDocument: () => { [key: string]: string };
 } & mongoose.Document;
 
@@ -44,14 +65,14 @@ const userSchema = new mongoose.Schema<UserDocument>(
         if (filter.isProfane(value))
           throw new Error("Display name cannot contain profanity.");
 
-        const existingUser = await User.findOne({
-          username: value.toLowerCase(),
-        });
-
-        if (existingUser)
-          throw new Error(
-            `Display name cannot be the same as another user's username`
-          );
+        // const existingUser = await User.findOne({
+        //   username: value.toLowerCase(),
+        // });
+        //
+        // if (existingUser)
+        //   throw new Error(
+        //     `Display name cannot be the same as another user's username`
+        //   );
 
         return true;
       },
@@ -76,17 +97,32 @@ const userSchema = new mongoose.Schema<UserDocument>(
       type: String,
       required: false,
     },
+    tokens: [tokenSchema],
   },
   {
     timestamps: true,
   }
 );
 
+type UserModel = {
+  getByJwt: (token: TokenObject) => Promise<UserDocument | null>;
+} & mongoose.Model<UserDocument>;
+
+(userSchema.statics as UserModel).getByJwt = async (token) => {
+  const user = await User.findById(token.sub);
+
+  if (user?.tokens.some((t) => isEqual(jwt.decode(t.token), token)))
+    return user;
+
+  return null;
+};
+
 userSchema.methods.toJSON = function () {
   const user = this.toObject();
   delete user.password;
   delete user.__v;
   delete user._id;
+  delete user.tokens;
 
   return user;
 };
@@ -98,6 +134,7 @@ userSchema.methods.getPublicDocument = function () {
   delete user._id;
   delete user.updatedAt;
   delete user.age;
+  delete user.tokens;
 
   return user;
 };
@@ -108,11 +145,17 @@ userSchema.methods.isPassword = async function (pass) {
   return await bcrypt.compare(pass, user.password);
 };
 
-userSchema.methods.createToken = function () {
+userSchema.methods.createToken = async function () {
   const user = this;
 
   const iat = new Date().getTime();
-  return jwt.sign({ sub: user.id, iat }, process.env.JWT_SECRET!);
+  const jwtObject: TokenObject = { sub: user.id, iat };
+  const token = jwt.sign(jwtObject, process.env.JWT_SECRET!);
+
+  user.tokens = user.tokens.concat({ token });
+  await user.save();
+
+  return token;
 };
 
 userSchema.pre<UserDocument>("save", async function (next) {
@@ -129,7 +172,7 @@ userSchema.pre<UserDocument>("save", async function (next) {
   next();
 });
 
-export const User = mongoose.model<UserDocument>("user", userSchema);
+export const User = mongoose.model<UserDocument, UserModel>("user", userSchema);
 
 export const isUser = (user: any): user is UserDocument =>
   user && user.schema === User.schema;
