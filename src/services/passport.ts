@@ -12,7 +12,7 @@ passport.use(
       if (!user)
         return done(null, false, { message: "Invalid username or password" });
 
-      if (!user.isPassword(password))
+      if (!(await user.isPassword(password)))
         return done(null, false, { message: "Invalid username or password" });
 
       return done(null, user);
