@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-
-const validIMDBIdPrefixes = ["tt", "mm", "co", "ev", "ch", "ni"];
+import { isValidIMDBId } from "../utils/omdb";
 
 const movieSchema = new mongoose.Schema({
   title: {
@@ -49,7 +48,7 @@ const movieSchema = new mongoose.Schema({
     required: true,
     trim: true,
     validate(value: string) {
-      return validIMDBIdPrefixes.some((prefix) => value.startsWith(prefix));
+      return isValidIMDBId(value);
     },
   },
 });

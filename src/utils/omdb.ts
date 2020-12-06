@@ -2,6 +2,7 @@ import axios from "axios";
 import { stringIsInt } from "./typeCheck";
 
 const omdbApiUrl = `http://www.omdbapi.com/?apikey=${process.env.OMDB_API_KEY}`;
+const validIMDBIdPrefixes = ["tt", "mm", "co", "ev", "ch", "ni"];
 
 type Params = Record<string, string>;
 
@@ -53,3 +54,6 @@ export const omdbRequest = async (params: Params) => {
     return extractMovieData(data);
   }
 };
+
+export const isValidIMDBId = (value: string) =>
+  validIMDBIdPrefixes.some((prefix) => value.startsWith(prefix));
