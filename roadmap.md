@@ -27,12 +27,12 @@
 #### REST API
 
 - **User CRUD operations** (_"/user"_)
-  - Create list (name, public/private, items array) (_POST "/user/list"_)
-  - Get list (_GET "/lists/:id"_)
-  - Get lists for user (_GET "user/:username/list/" or "/user/list"_)
-  - Update list (_PATCH "/user/list/:id"_)
-  - Delete list (_DELETE "/user/list/:id"_)
-  - Search lists (_GET "/lists?contains=\<\[string\]\>&createdBy=\<string\>&createdAt=\<string\>&sortBy=\<createdAt|modifiedAt|length|alphabetical\>\_\<asc|desc\>"_)
+  - Create list (name, public/private, items array) (_POST "/list"_)
+  - Get list (_GET "/list/:id"_)
+  - Get lists for user (_GET "/user/:username/list/" or "/list"_)
+  - Update list (_PATCH "/list/:id"_, "add" or "remove" in body with ID array)
+  - Delete list (_DELETE "/list/:id"_)
+  - Search lists (_GET "/list?contains=\<\[string\]\>&createdBy=\<string\>&createdAt=\<string\>&sortBy=\<createdAt|modifiedAt|length|alphabetical\>\_\<asc|desc\>"_)
 
 #### Front End
 
