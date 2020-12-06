@@ -1,5 +1,4 @@
 import { RequestHandler } from "express";
-import { Types as mongooseTypes } from "mongoose";
 import { User, UserDocument, isUser } from "../models/User";
 
 export const readSelf: RequestHandler = async (req, res) => {
