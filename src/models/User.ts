@@ -35,7 +35,7 @@ export type UserDocument = {
   tokens: TokenSchema[];
   isPassword: (pass: string) => Promise<boolean>;
   createToken: () => Promise<string>;
-  getPublicDocument: () => { [key: string]: string };
+  getPublicDocument: () => { [key: string]: any };
 } & mongoose.Document;
 
 const userSchema = new mongoose.Schema<UserDocument>(

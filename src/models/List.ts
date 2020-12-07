@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import { User } from ".";
 import { isValidIMDBId } from "../utils/omdb";
+import { User, UserDocument, isUser } from "./User";
 
-type MovieIdSchema = { id: string };
+type MovieIdDocument = { id: string } & mongoose.Document;
 
-const movieIdSchema = new mongoose.Schema<MovieIdSchema>(
+const movieIdSchema = new mongoose.Schema<MovieIdDocument>(
   {
     id: {
       type: String,
@@ -18,13 +18,14 @@ const movieIdSchema = new mongoose.Schema<MovieIdSchema>(
   }
 );
 
-type ListSchema = {
+type ListDocument = {
   createdBy: mongoose.Types.ObjectId;
-  movieIds: string[];
+  movieIds: MovieIdDocument[];
   isPublic: boolean;
+  userCanView: (user?: any) => boolean;
 } & mongoose.Document;
 
-const listSchema = new mongoose.Schema<ListSchema>(
+const listSchema = new mongoose.Schema<ListDocument>(
   {
     createdBy: {
       type: mongoose.Types.ObjectId,
@@ -40,10 +41,35 @@ const listSchema = new mongoose.Schema<ListSchema>(
       type: Boolean,
       required: true,
     },
+    // Add viewable by ID array
   },
   {
     timestamps: true,
   }
 );
 
-export const List = mongoose.model("list", listSchema);
+listSchema.methods.toJSON = function () {
+  const list: ListDocument = this.toObject();
+
+  delete list.__v;
+  for (let i = 0; i < list.movieIds.length; i++) {
+    delete list.movieIds[i]._id;
+  }
+
+  return list;
+};
+
+listSchema.methods.userCanView = function (user) {
+  if (this.isPublic) return true;
+
+  if (!isUser(user)) return false;
+
+  if (user) return this.createdBy.equals(user.id);
+  // Add condition for user.id in viewable by array
+
+  return false;
+};
+
+type ListModel = {} & mongoose.Model<ListDocument>;
+
+export const List = mongoose.model<ListDocument, ListModel>("list", listSchema);

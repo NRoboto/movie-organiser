@@ -10,6 +10,7 @@ import {
   signup,
   getMovies,
   createList,
+  getList,
 } from "./controllers";
 
 // useAuth provides req.user if a token is provided, otherwise req.user is undefined
@@ -47,6 +48,7 @@ router.delete("/user", requireAuth, deleteUser);
 
 // Lists
 router.post("/list", requireAuth, createList);
+router.get("/list/:id", useAuth, getList);
 
 // Movies
 router.get("/movie", getMovies);
