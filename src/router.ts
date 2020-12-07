@@ -9,6 +9,7 @@ import {
   signin,
   signup,
   getMovies,
+  createList,
 } from "./controllers";
 
 // useAuth provides req.user if a token is provided, otherwise req.user is undefined
@@ -37,14 +38,15 @@ const requireSignin = passport.authenticate("local", {
 export const router = express.Router();
 
 // Users
+router.post("/signup", signup, signin);
+router.post("/login", requireSignin, signin);
 router.get("/user/", searchUser, requireAuth, readSelf); // If no search query params, searchUser will pass handling to readUser
 router.get("/user/:username", useAuth, readUser);
 router.patch("/user", requireAuth, updateUser);
 router.delete("/user", requireAuth, deleteUser);
 
-// Authentication
-router.post("/login", requireSignin, signin);
-router.post("/signup", signup, signin);
+// Lists
+router.post("/list", requireAuth, createList);
 
 // Movies
 router.get("/movie", getMovies);
