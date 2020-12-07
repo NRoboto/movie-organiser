@@ -3,6 +3,7 @@ import Filter from "bad-words";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import isEqual from "lodash.isequal";
+import { ListDocument } from "./List";
 
 const filter = new Filter();
 
@@ -36,6 +37,11 @@ export type UserDocument = {
   isPassword: (pass: string) => Promise<boolean>;
   createToken: () => Promise<string>;
   getPublicDocument: () => { [key: string]: any };
+  getLists: (
+    limit?: number,
+    skip?: number,
+    sort?: string
+  ) => Promise<ListDocument[]>;
 } & mongoose.Document;
 
 const userSchema = new mongoose.Schema<UserDocument>(
@@ -104,8 +110,18 @@ const userSchema = new mongoose.Schema<UserDocument>(
   }
 );
 
+userSchema.virtual("lists", {
+  ref: "list",
+  localField: "_id",
+  foreignField: "createdBy",
+});
+
 type UserModel = {
   getByJwt: (token: TokenObject) => Promise<UserDocument | null>;
+  getViewableLists: (
+    targetUserId: string | mongoose.Types.ObjectId,
+    user?: UserDocument
+  ) => Promise<ListDocument[]>;
 } & mongoose.Model<UserDocument>;
 
 (userSchema.statics as UserModel).getByJwt = async (token) => {
@@ -156,6 +172,23 @@ userSchema.methods.createToken = async function () {
   await user.save();
 
   return token;
+};
+
+userSchema.methods.getLists = async function (limit, skip, sort) {
+  const user = this;
+
+  await user
+    .populate({
+      path: "lists",
+      options: {
+        limit,
+        skip,
+        sort,
+      },
+    })
+    .execPopulate();
+
+  return (user as any).lists;
 };
 
 userSchema.pre<UserDocument>("save", async function (next) {
