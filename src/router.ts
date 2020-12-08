@@ -11,6 +11,7 @@ import {
   getMovies,
   createList,
   getList,
+  getUserLists,
   getSelfLists,
 } from "./controllers";
 
@@ -50,6 +51,7 @@ router.delete("/user", requireAuth, deleteUser);
 // Lists
 router.post("/list", requireAuth, createList);
 router.get("/list/:id", useAuth, getList);
+router.get("/user/:username/list", useAuth, getUserLists);
 router.get("/list", requireAuth, getSelfLists);
 
 // Movies

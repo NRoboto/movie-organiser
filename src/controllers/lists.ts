@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import mongoose from "mongoose";
-import { isUser, List } from "../models";
+import { isUser, List, User } from "../models";
 
 export const createList: RequestHandler = async (req, res) => {
   const { isPublic = true, ids = [] } = req.body;
@@ -43,14 +43,13 @@ export const getList: RequestHandler = async (req, res) => {
   }
 };
 
-export const getSelfLists: RequestHandler = async (req, res) => {
-  if (!isUser(req.user))
-    return res.status(500).send({ error: "Authentication error" });
+export const getUserLists: RequestHandler = async (req, res) => {
+  const username = req.params.username;
 
   try {
     const itemsPerPage = 5;
-    const pageQuery = req.query.page;
-    const page = typeof pageQuery === "string" ? parseInt(pageQuery) : 0;
+    const page =
+      typeof req.query.page === "string" ? parseInt(req.query.page) : 0;
     const sort: { [key: string]: any } = {};
 
     if (typeof req.query.sort === "string") {
@@ -58,11 +57,36 @@ export const getSelfLists: RequestHandler = async (req, res) => {
       sort[sortBy] = order === "asc" ? 1 : -1;
     }
 
-    const lists = await req.user.getLists(
+    const lists = await User.getViewableLists(
+      username,
+      page,
       itemsPerPage,
-      page * itemsPerPage,
-      sort
+      sort,
+      isUser(req.user) ? req.user : undefined
     );
+
+    res.send({ lists });
+  } catch (error) {
+    res.status(500).send({ error: error.toString() });
+  }
+};
+
+export const getSelfLists: RequestHandler = async (req, res) => {
+  if (!isUser(req.user))
+    return res.status(500).send({ error: "Authentication error" });
+
+  try {
+    const itemsPerPage = 5;
+    const page =
+      typeof req.query.page === "string" ? parseInt(req.query.page) : 0;
+    const sort: { [key: string]: any } = {};
+
+    if (typeof req.query.sort === "string") {
+      const [sortBy, order] = req.query.sort.split("_");
+      sort[sortBy] = order === "asc" ? 1 : -1;
+    }
+
+    const lists = await req.user.getLists(page, itemsPerPage, sort, true);
 
     if (!lists) res.status(500).send({ error: "Unable to get lists" });
 

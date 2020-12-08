@@ -38,9 +38,10 @@ export type UserDocument = {
   createToken: () => Promise<string>;
   getPublicDocument: () => { [key: string]: any };
   getLists: (
-    limit?: number,
-    skip?: number,
-    sort?: { [key: string]: any }
+    page?: number,
+    itemsPerPage?: number,
+    sort?: { [key: string]: any },
+    showPrivate?: boolean
   ) => Promise<ListDocument[]>;
 } & mongoose.Document;
 
@@ -119,8 +120,11 @@ userSchema.virtual("lists", {
 type UserModel = {
   getByJwt: (token: TokenObject) => Promise<UserDocument | null>;
   getViewableLists: (
-    targetUserId: string | mongoose.Types.ObjectId,
-    user?: UserDocument
+    username: string,
+    page?: number,
+    itemsPerPage?: number,
+    sort?: { [key: string]: any },
+    currentUser?: UserDocument
   ) => Promise<ListDocument[]>;
 } & mongoose.Model<UserDocument>;
 
@@ -131,6 +135,21 @@ type UserModel = {
     return user;
 
   return null;
+};
+
+(userSchema.statics as UserModel).getViewableLists = async (
+  username,
+  page = 0,
+  itemsPerPage = 5,
+  sort,
+  currentUser
+) => {
+  const user = await User.findOne({ username });
+  if (!user) throw new Error(`User "${username}" not found.`);
+
+  const showPrivate = currentUser?.id === user.id;
+
+  return await user.getLists(page, itemsPerPage, sort, showPrivate);
 };
 
 userSchema.methods.toJSON = function () {
@@ -174,12 +193,24 @@ userSchema.methods.createToken = async function () {
   return token;
 };
 
-userSchema.methods.getLists = async function (limit, skip, sort) {
+userSchema.methods.getLists = async function (
+  page = 0,
+  itemsPerPage = 5,
+  sort,
+  showPrivate = false
+) {
   const user = this;
+
+  const limit = itemsPerPage;
+  const skip = itemsPerPage * page;
+
+  const match: { [key: string]: boolean } = {};
+  if (!showPrivate) match["isPublic"] = true;
 
   await user
     .populate({
       path: "lists",
+      match,
       options: {
         limit,
         skip,
