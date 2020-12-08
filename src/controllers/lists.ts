@@ -42,3 +42,34 @@ export const getList: RequestHandler = async (req, res) => {
     res.status(500).send({ error: error.toString() });
   }
 };
+
+export const getSelfLists: RequestHandler = async (req, res) => {
+  if (!isUser(req.user))
+    return res.status(500).send({ error: "Authentication error" });
+
+  try {
+    const itemsPerPage = 5;
+    const pageQuery = req.query.page;
+    const page = typeof pageQuery === "string" ? parseInt(pageQuery) : 0;
+    const sort: { [key: string]: any } = {};
+
+    if (typeof req.query.sort === "string") {
+      const [sortBy, order] = req.query.sort.split("_");
+      sort[sortBy] = order === "asc" ? 1 : -1;
+    }
+
+    const lists = await req.user.getLists(
+      itemsPerPage,
+      page * itemsPerPage,
+      sort
+    );
+
+    if (!lists) res.status(500).send({ error: "Unable to get lists" });
+
+    console.log("lists", lists);
+
+    res.send({ lists });
+  } catch (error) {
+    res.status(500).send({ error: error.toString() });
+  }
+};

@@ -8,6 +8,7 @@ const movieIdSchema = new mongoose.Schema<MovieIdDocument>(
   {
     id: {
       type: String,
+      required: true,
       validate(value: string) {
         return isValidIMDBId(value);
       },
@@ -18,7 +19,7 @@ const movieIdSchema = new mongoose.Schema<MovieIdDocument>(
   }
 );
 
-type ListDocument = {
+export type ListDocument = {
   createdBy: mongoose.Types.ObjectId;
   movieIds: MovieIdDocument[];
   isPublic: boolean;
