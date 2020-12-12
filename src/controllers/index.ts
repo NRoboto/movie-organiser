@@ -13,4 +13,5 @@ export {
   getUserLists,
   getSelfLists,
   updateList,
+  deleteList,
 } from "./lists";

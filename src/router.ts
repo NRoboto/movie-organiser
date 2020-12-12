@@ -14,6 +14,7 @@ import {
   getUserLists,
   getSelfLists,
   updateList,
+  deleteList,
 } from "./controllers";
 
 // useAuth provides req.user if a token is provided, otherwise req.user is undefined
@@ -55,6 +56,7 @@ router.get("/list/:id", useAuth, getList);
 router.get("/user/:username/list", useAuth, getUserLists);
 router.get("/list", requireAuth, getSelfLists);
 router.patch("/list/:id", useAuth, updateList);
+router.delete("/list/:id", requireAuth, deleteList);
 
 // Movies
 router.get("/movie", getMovies);

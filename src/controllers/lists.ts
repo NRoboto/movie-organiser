@@ -132,3 +132,22 @@ export const updateList: RequestHandler = async (req, res) => {
     res.status(500).send({ error: error.toString() });
   }
 };
+
+export const deleteList: RequestHandler = async (req, res) => {
+  if (!isUser(req.user))
+    return res.status(500).send({ error: "Authentication error" });
+
+  try {
+    const list = await List.deleteOne({
+      _id: req.params.id,
+      createdBy: req.user.id,
+    });
+
+    if (list.deletedCount === 0)
+      return res.status(404).send({ error: "List not found" });
+
+    res.send(list);
+  } catch (error) {
+    res.status(500).send({ error: error.toString() });
+  }
+};
