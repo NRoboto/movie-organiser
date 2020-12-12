@@ -76,15 +76,6 @@ const userSchema = new mongoose.Schema<UserDocument>(
         if (filter.isProfane(value))
           throw new Error("Display name cannot contain profanity.");
 
-        // const existingUser = await User.findOne({
-        //   username: value.toLowerCase(),
-        // });
-        //
-        // if (existingUser)
-        //   throw new Error(
-        //     `Display name cannot be the same as another user's username`
-        //   );
-
         return true;
       },
     },
