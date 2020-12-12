@@ -15,7 +15,10 @@ const movieIdSchema = new mongoose.Schema<MovieIdDocument>(
     },
   },
   {
-    timestamps: true,
+    timestamps: {
+      createdAt: true,
+      updatedAt: false,
+    },
   }
 );
 
