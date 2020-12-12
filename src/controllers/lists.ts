@@ -104,10 +104,16 @@ export const updateList: RequestHandler = async (req, res) => {
   const removeArr: string[] | undefined = req.body.remove;
   // const moveArr: string[] | undefined = req.body.move;
 
+  if (!isUser(req.user))
+    return res.status(500).send({ error: "Authentication error" });
+
   try {
     const list = await List.findById(req.params.id);
 
     if (!list) return res.status(404).send({ error: "List not found" });
+
+    if (!list.createdBy.equals(req.user._id))
+      return res.status(404).send({ error: "List not found" });
 
     // Add ids
     const addIds =
