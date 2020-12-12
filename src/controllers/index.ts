@@ -5,7 +5,7 @@ export {
   deleteUser,
   searchUser,
 } from "./users";
-export { signin, signup } from "./auth";
+export { signin, signup, signout, signoutAll } from "./auth";
 export { getMovies } from "./movies";
 export {
   createList,

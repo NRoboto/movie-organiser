@@ -8,6 +8,8 @@ import {
   searchUser,
   signin,
   signup,
+  signout,
+  signoutAll,
   getMovies,
   createList,
   getList,
@@ -45,6 +47,7 @@ export const router = express.Router();
 // Users
 router.post("/signup", signup, signin);
 router.post("/login", requireSignin, signin);
+router.post("/signout", requireAuth, signoutAll, signout); // If body doesn't contain "all": true, signout from token
 router.get("/user/", searchUser, requireAuth, readSelf); // If no search query params, searchUser will pass handling to readUser
 router.get("/user/:username", useAuth, readUser);
 router.patch("/user", requireAuth, updateUser);
