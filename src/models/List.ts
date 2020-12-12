@@ -2,11 +2,11 @@ import mongoose from "mongoose";
 import { isValidIMDBId } from "../utils/omdb";
 import { User, UserDocument, isUser } from "./User";
 
-type MovieIdDocument = { id: string } & mongoose.Document;
+export type MovieIdDocument = { movieId: string } & mongoose.Document;
 
 const movieIdSchema = new mongoose.Schema<MovieIdDocument>(
   {
-    id: {
+    movieId: {
       type: String,
       required: true,
       validate(value: string) {
@@ -21,7 +21,7 @@ const movieIdSchema = new mongoose.Schema<MovieIdDocument>(
 
 export type ListDocument = {
   createdBy: mongoose.Types.ObjectId;
-  movieIds: MovieIdDocument[];
+  movieIds: mongoose.Types.Array<MovieIdDocument>;
   isPublic: boolean;
   userCanView: (user?: any) => boolean;
 } & mongoose.Document;
@@ -53,9 +53,6 @@ listSchema.methods.toJSON = function () {
   const list: ListDocument = this.toObject();
 
   delete list.__v;
-  for (let i = 0; i < list.movieIds.length; i++) {
-    delete list.movieIds[i]._id;
-  }
 
   return list;
 };

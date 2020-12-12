@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import mongoose from "mongoose";
 import { isUser, List, User } from "../models";
+import { ListDocument, MovieIdDocument } from "../models/List";
 
 export const createList: RequestHandler = async (req, res) => {
   const { isPublic = true, ids = [] } = req.body;
@@ -12,7 +13,7 @@ export const createList: RequestHandler = async (req, res) => {
     const list = await new List({
       createdBy: req.user._id,
       movieIds: ids.map((id: string) => ({
-        id,
+        movieId: id,
       })),
       isPublic,
     }).save();
@@ -93,6 +94,34 @@ export const getSelfLists: RequestHandler = async (req, res) => {
     console.log("lists", lists);
 
     res.send({ lists });
+  } catch (error) {
+    res.status(500).send({ error: error.toString() });
+  }
+};
+
+export const updateList: RequestHandler = async (req, res) => {
+  const addArr: string[] | undefined = req.body.add;
+  const removeArr: string[] | undefined = req.body.remove;
+  // const moveArr: string[] | undefined = req.body.move;
+
+  try {
+    const list = await List.findById(req.params.id);
+
+    if (!list) return res.status(404).send({ error: "List not found" });
+
+    // Add ids
+    const addIds =
+      addArr?.map((movieId) => ({ movieId } as MovieIdDocument)) ?? [];
+    addIds.forEach((id) => list.movieIds.push(id));
+
+    // Remove ids
+    list.movieIds = list.movieIds.filter(
+      (id) => !removeArr?.includes(id.id)
+    ) as mongoose.Types.Array<MovieIdDocument>;
+
+    const newList = await list.save({ validateBeforeSave: true });
+
+    res.send({ list: newList });
   } catch (error) {
     res.status(500).send({ error: error.toString() });
   }
