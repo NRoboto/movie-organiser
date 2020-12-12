@@ -71,6 +71,13 @@ listSchema.methods.userCanView = function (user) {
   return false;
 };
 
+listSchema.pre<ListDocument>("save", async function () {
+  const list = this;
+
+  if (list.movieIds.length > 100)
+    throw new Error("Max movieIds length exceeded");
+});
+
 type ListModel = {} & mongoose.Model<ListDocument>;
 
 export const List = mongoose.model<ListDocument, ListModel>("list", listSchema);
