@@ -26,6 +26,7 @@ const tokenSchema = new mongoose.Schema(
       createdAt: true,
       updatedAt: false,
     },
+    _id: false,
   }
 );
 
