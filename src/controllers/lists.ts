@@ -7,7 +7,7 @@ export const createList: RequestHandler = async (req, res) => {
   const { isPublic = true, ids = [] } = req.body;
 
   if (!isUser(req.user))
-    return res.status(500).send({ error: "Authentication error" });
+    return res.status(401).send({ error: "Authentication error" });
 
   try {
     const list = await new List({
@@ -74,7 +74,7 @@ export const getUserLists: RequestHandler = async (req, res) => {
 
 export const getSelfLists: RequestHandler = async (req, res) => {
   if (!isUser(req.user))
-    return res.status(500).send({ error: "Authentication error" });
+    return res.status(401).send({ error: "Authentication error" });
 
   try {
     const itemsPerPage = 5;
@@ -105,7 +105,7 @@ export const updateList: RequestHandler = async (req, res) => {
   // const moveArr: string[] | undefined = req.body.move;
 
   if (!isUser(req.user))
-    return res.status(500).send({ error: "Authentication error" });
+    return res.status(401).send({ error: "Authentication error" });
 
   try {
     const list = await List.findById(req.params.id);
@@ -135,7 +135,7 @@ export const updateList: RequestHandler = async (req, res) => {
 
 export const deleteList: RequestHandler = async (req, res) => {
   if (!isUser(req.user))
-    return res.status(500).send({ error: "Authentication error" });
+    return res.status(401).send({ error: "Authentication error" });
 
   try {
     const list = await List.deleteOne({

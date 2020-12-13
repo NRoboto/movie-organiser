@@ -3,7 +3,7 @@ import { User, UserDocument, isUser } from "../models/User";
 
 export const readSelf: RequestHandler = async (req, res) => {
   if (!isUser(req.user))
-    return res.status(500).send({ error: "User is not authenticated" });
+    return res.status(401).send({ error: "Authentication error" });
 
   res.send(req.user);
 };
@@ -34,7 +34,7 @@ export const updateUser: RequestHandler = async (req, res) => {
   ];
 
   if (!isUser(req.user))
-    return res.status(500).send({ error: "User is not authenticated" });
+    return res.status(401).send({ error: "Authentication error" });
 
   try {
     const updates: { [key in keyof UserDocument]?: any } = {};
@@ -53,7 +53,7 @@ export const updateUser: RequestHandler = async (req, res) => {
 
 export const deleteUser: RequestHandler = async (req, res) => {
   if (!isUser(req.user))
-    return res.status(500).send({ error: "User is not authenticated" });
+    return res.status(401).send({ error: "Authentication error" });
 
   const username = req.user.username;
 

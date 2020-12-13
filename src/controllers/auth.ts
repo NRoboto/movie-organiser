@@ -3,7 +3,7 @@ import { User, isUser } from "../models";
 
 export const signin: RequestHandler = async (req, res) => {
   if (!isUser(req.user) || !(await req.user.isPassword(req.body.password))) {
-    return res.status(500).send({ error: "Could not sign in" });
+    return res.status(401).send({ error: "Authentication error" });
   }
 
   res.send({
