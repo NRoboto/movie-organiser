@@ -2,152 +2,132 @@ import { RequestHandler } from "express";
 import mongoose from "mongoose";
 import { isUser, List, User } from "../models";
 import { ListDocument, MovieIdDocument } from "../models/List";
+import { ReqAuthRequestHandler, UseAuthRequestHandler } from "./types";
 
-export const createList: RequestHandler = async (req, res) => {
+export const createList: ReqAuthRequestHandler = async (
+  req,
+  res,
+  next,
+  user
+) => {
   const { isPublic = true, ids = [] } = req.body;
 
-  if (!isUser(req.user))
-    return res.status(401).send({ error: "Authentication error" });
+  const list = await new List({
+    createdBy: user._id,
+    movieIds: ids.map((id: string) => ({
+      movieId: id,
+    })),
+    isPublic,
+  }).save();
 
-  try {
-    const list = await new List({
-      createdBy: req.user._id,
-      movieIds: ids.map((id: string) => ({
-        movieId: id,
-      })),
-      isPublic,
-    }).save();
+  if (!list) return next({ message: "Unable to create list", status: 500 });
 
-    return res.send({ list });
-  } catch (error) {
-    res.status(500).send({ error: error.toString() });
-  }
+  return res.send({ list });
 };
 
-export const getList: RequestHandler = async (req, res) => {
+export const getList: UseAuthRequestHandler = async (req, res, next, user) => {
   const id = req.params.id;
-  if (!id) return res.status(400).send({ error: "Invalid id" });
+  if (!id) return next({ message: "Invalid id", status: 400 });
 
-  try {
-    let list = await List.findById(id);
+  let list = await List.findById(id);
+  if (list && !list.userCanView(user)) list = null;
 
-    if (list && !list.userCanView(req.user)) list = null;
+  if (!list)
+    return next({ message: `List { id: ${id} } does not exist.`, status: 404 });
 
-    if (!list)
-      return res
-        .status(404)
-        .send({ error: `List { id: ${id} } does not exist.` });
-
-    res.send(list);
-  } catch (error) {
-    res.status(500).send({ error: error.toString() });
-  }
+  res.send(list);
 };
 
-export const getUserLists: RequestHandler = async (req, res) => {
+const parseGetListQuery = (query: Record<string, any>) => {
+  const itemsPerPage = 5;
+  const page = typeof query.page === "string" ? parseInt(query.page) : 0;
+
+  const sort: { [key: string]: any } = {};
+  if (typeof query.sort === "string") {
+    const [sortBy, order] = query.sort.split("_");
+    sort[sortBy] = order === "asc" ? 1 : -1;
+  }
+
+  return { itemsPerPage, page, sort };
+};
+
+export const getUserLists: UseAuthRequestHandler = async (
+  req,
+  res,
+  next,
+  user
+) => {
   const username = req.params.username;
+  const { itemsPerPage, page, sort } = parseGetListQuery(req.query);
 
-  try {
-    const itemsPerPage = 5;
-    const page =
-      typeof req.query.page === "string" ? parseInt(req.query.page) : 0;
-    const sort: { [key: string]: any } = {};
+  const lists = await User.getViewableLists(
+    username,
+    page,
+    itemsPerPage,
+    sort,
+    user
+  );
 
-    if (typeof req.query.sort === "string") {
-      const [sortBy, order] = req.query.sort.split("_");
-      sort[sortBy] = order === "asc" ? 1 : -1;
-    }
-
-    const lists = await User.getViewableLists(
-      username,
-      page,
-      itemsPerPage,
-      sort,
-      isUser(req.user) ? req.user : undefined
-    );
-
-    res.send({ lists });
-  } catch (error) {
-    res.status(500).send({ error: error.toString() });
-  }
+  res.send({ lists });
 };
 
-export const getSelfLists: RequestHandler = async (req, res) => {
-  if (!isUser(req.user))
-    return res.status(401).send({ error: "Authentication error" });
+export const getSelfLists: ReqAuthRequestHandler = async (
+  req,
+  res,
+  next,
+  user
+) => {
+  const { itemsPerPage, page, sort } = parseGetListQuery(req.query);
 
-  try {
-    const itemsPerPage = 5;
-    const page =
-      typeof req.query.page === "string" ? parseInt(req.query.page) : 0;
-    const sort: { [key: string]: any } = {};
+  const lists = await user.getLists(page, itemsPerPage, sort, true);
+  if (!lists) return next({ message: "Unable to get lists", status: 500 });
 
-    if (typeof req.query.sort === "string") {
-      const [sortBy, order] = req.query.sort.split("_");
-      sort[sortBy] = order === "asc" ? 1 : -1;
-    }
-
-    const lists = await req.user.getLists(page, itemsPerPage, sort, true);
-
-    if (!lists) res.status(500).send({ error: "Unable to get lists" });
-
-    console.log("lists", lists);
-
-    res.send({ lists });
-  } catch (error) {
-    res.status(500).send({ error: error.toString() });
-  }
+  res.send({ lists });
 };
 
-export const updateList: RequestHandler = async (req, res) => {
+export const updateList: ReqAuthRequestHandler = async (
+  req,
+  res,
+  next,
+  user
+) => {
   const addArr: string[] | undefined = req.body.add;
   const removeArr: string[] | undefined = req.body.remove;
   // const moveArr: string[] | undefined = req.body.move;
 
-  if (!isUser(req.user))
-    return res.status(401).send({ error: "Authentication error" });
+  const list = await List.findById(req.params.id);
 
-  try {
-    const list = await List.findById(req.params.id);
+  if (!list || !list.createdBy.equals(user._id))
+    return next({ message: "List not found", status: 404 });
 
-    if (!list) return res.status(404).send({ error: "List not found" });
+  // Add ids
+  const addIds =
+    addArr?.map((movieId) => ({ movieId } as MovieIdDocument)) ?? [];
+  addIds.forEach((id) => list.movieIds.push(id));
 
-    if (!list.createdBy.equals(req.user._id))
-      return res.status(404).send({ error: "List not found" });
+  // Remove ids
+  list.movieIds = list.movieIds.filter(
+    (id) => !removeArr?.includes(id.id)
+  ) as mongoose.Types.Array<MovieIdDocument>;
 
-    // Add ids
-    const addIds =
-      addArr?.map((movieId) => ({ movieId } as MovieIdDocument)) ?? [];
-    addIds.forEach((id) => list.movieIds.push(id));
+  const newList = await list.save({ validateBeforeSave: true });
 
-    // Remove ids
-    list.movieIds = list.movieIds.filter(
-      (id) => !removeArr?.includes(id.id)
-    ) as mongoose.Types.Array<MovieIdDocument>;
-
-    const newList = await list.save({ validateBeforeSave: true });
-
-    res.send({ list: newList });
-  } catch (error) {
-    res.status(500).send({ error: error.toString() });
-  }
+  res.send({ list: newList });
 };
 
-export const deleteList: RequestHandler = async (req, res) => {
-  if (!isUser(req.user))
-    return res.status(401).send({ error: "Authentication error" });
+export const deleteList: ReqAuthRequestHandler = async (
+  req,
+  res,
+  next,
+  user
+) => {
+  const list = await List.deleteOne({
+    _id: req.params.id,
+    createdBy: user.id,
+  });
 
-  try {
-    const list = await List.deleteOne({
-      _id: req.params.id,
-      createdBy: req.user.id,
-    });
+  if (list.deletedCount === 0)
+    return next({ message: "List not found", status: 404 });
 
-    if (list.deletedCount === 0)
-      return res.status(404).send({ error: "List not found" });
-
-    res.send(list);
-  } catch (error) {
-    res.status(500).send({ error: error.toString() });
-  }
+  res.send(list);
 };

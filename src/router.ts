@@ -1,4 +1,4 @@
-import express from "express";
+import express, { RequestHandler } from "express";
 import passport from "passport";
 import {
   readSelf,
@@ -18,48 +18,96 @@ import {
   updateList,
   deleteList,
 } from "./controllers";
+import {
+  ReqAuthRequestHandler,
+  SigninRequestHandler,
+  UseAuthRequestHandler,
+} from "./controllers/types";
 
-// useAuth provides req.user if a token is provided, otherwise req.user is undefined
-const useAuth: express.RequestHandler = (req, res, next) =>
+export const useReqAuthHandler = (
+  handler: ReqAuthRequestHandler
+): RequestHandler => async (req, res, next) => {
   passport.authenticate(
     "jwt",
-    {
-      session: false,
-    },
-    (err, user, info) => {
-      if (err) return next(err);
-      if (!user) return next();
-      req.user = user;
-      next();
+    { session: false },
+    async (error, user, info) => {
+      if (error) return next(error);
+      if (!user) return next({ message: "Authentication failed", status: 401 });
+
+      try {
+        await handler(req, res, next, user);
+      } catch (error) {
+        next(error);
+      }
     }
   )(req, res, next);
+};
 
-const requireAuth = passport.authenticate("jwt", {
-  session: false,
-});
+export const useUseAuthHandler = (
+  handler: UseAuthRequestHandler
+): RequestHandler => async (req, res, next) => {
+  passport.authenticate(
+    "jwt",
+    { session: false },
+    async (error, user, info) => {
+      if (error) return next(error);
 
-const requireSignin = passport.authenticate("local", {
-  session: false,
-});
+      try {
+        await handler(req, res, next, user);
+      } catch (error) {
+        next(error);
+      }
+    }
+  )(req, res, next);
+};
+
+export const useSigninHandler = (
+  handler: SigninRequestHandler
+): RequestHandler => async (req, res, next) => {
+  passport.authenticate(
+    "local",
+    { session: false },
+    async (error, user, info) => {
+      if (error) return next(error);
+      if (!user) return next({ message: "Authentication failed", status: 401 });
+
+      try {
+        await handler(req, res, next, user);
+      } catch (error) {
+        next(error);
+      }
+    }
+  )(req, res, next);
+};
 
 export const router = express.Router();
 
 // Users
-router.post("/signup", signup, signin);
-router.post("/login", requireSignin, signin);
-router.post("/signout", requireAuth, signoutAll, signout); // If body doesn't contain "all": true, signout from token
-router.get("/user/", searchUser, requireAuth, readSelf); // If no search query params, searchUser will pass handling to readUser
-router.get("/user/:username", useAuth, readUser);
-router.patch("/user", requireAuth, updateUser);
-router.delete("/user", requireAuth, deleteUser);
+router.post("/signup", signup);
+router.post("/login", useSigninHandler(signin));
+router.post(
+  "/signout",
+  useReqAuthHandler(signoutAll),
+  useReqAuthHandler(signout)
+); // If body doesn't contain { "all": true }, signout from token
+router.get("/user/", searchUser, useReqAuthHandler(readSelf)); // If no search query params, searchUser will pass handling to readUser
+router.get("/user/:username", useUseAuthHandler(readUser));
+router.patch("/user", useReqAuthHandler(updateUser));
+router.delete("/user", useReqAuthHandler(deleteUser));
 
 // Lists
-router.post("/list", requireAuth, createList);
-router.get("/list/:id", useAuth, getList);
-router.get("/user/:username/list", useAuth, getUserLists);
-router.get("/list", requireAuth, getSelfLists);
-router.patch("/list/:id", useAuth, updateList);
-router.delete("/list/:id", requireAuth, deleteList);
+router.post("/list", useReqAuthHandler(createList));
+router.get("/list/:id", useUseAuthHandler(getList));
+router.get("/user/:username/list", useUseAuthHandler(getUserLists));
+router.get("/list", useReqAuthHandler(getSelfLists));
+router.patch("/list/:id", useReqAuthHandler(updateList));
+router.delete("/list/:id", useReqAuthHandler(deleteList));
 
 // Movies
 router.get("/movie", getMovies);
+
+const errHandler: express.ErrorRequestHandler = (err, _req, res, _next) => {
+  res.status(err.status ?? 500).send({ error: err.message });
+};
+
+router.use(errHandler);

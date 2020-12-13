@@ -2,6 +2,8 @@ import path from "path";
 import express from "express";
 import chalk from "chalk";
 import passport from "passport";
+// @ts-ignore Catches async errors in express routes
+import "express-async-errors";
 
 import { initMongoose } from "./db/init";
 import { router } from "./router";

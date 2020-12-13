@@ -1,71 +1,57 @@
 import { RequestHandler } from "express";
 import { User, isUser } from "../models";
+import {
+  ReqAuthRequestHandler,
+  UseAuthRequestHandler,
+  SigninRequestHandler,
+} from "./types";
 
-export const signin: RequestHandler = async (req, res) => {
-  if (!isUser(req.user) || !(await req.user.isPassword(req.body.password))) {
-    return res.status(401).send({ error: "Authentication error" });
-  }
-
+export const signin: SigninRequestHandler = async (req, res, next, user) => {
   res.send({
-    token: await req.user.createToken(),
+    token: await user.createToken(),
   });
 };
 
 export const signup: RequestHandler = async (req, res, next) => {
   const { username, password, gender, age, location } = req.body;
 
-  try {
-    const user = await User.findOne({ username });
+  const user = await User.findOne({ username });
+  if (user) return next({ message: "Email already in use", status: 422 });
 
-    if (user) return res.status(422).send({ error: "Email already in use" });
+  const newUser = await new User({
+    username,
+    password,
+    gender,
+    age,
+    location,
+  }).save();
 
-    const newUser = await new User({
-      username,
-      password,
-      gender,
-      age,
-      location,
-    }).save();
+  if (!newUser) return next({ message: "Error creating user", status: 500 });
 
-    req.user = newUser;
-    return next();
-  } catch (error) {
-    res.status(500).send({ error: error.toString() });
-  }
+  return await signin(req, res, next, newUser);
 };
 
-export const signout: RequestHandler = async (req, res) => {
+export const signout: ReqAuthRequestHandler = async (req, res, next, user) => {
   const reqToken = req.body.token;
 
-  if (!isUser(req.user))
-    return res.status(401).send({ error: "Authentication error" });
+  if (!reqToken) return next({ message: "No token provided", status: 400 });
 
-  if (!reqToken) return res.status(400).send({ error: "No token provided" });
+  user.tokens = user.tokens.filter((token) => token.token !== reqToken);
+  const updatedUser = await user.save();
 
-  try {
-    req.user.tokens = req.user.tokens.filter(
-      (token) => token.token !== reqToken
-    );
-    const user = await req.user.save();
-
-    res.send({ user });
-  } catch (error) {
-    res.status(500).send({ error: error.toString() });
-  }
+  res.send({ user: updatedUser });
 };
 
-export const signoutAll: RequestHandler = async (req, res, next) => {
-  if (!isUser(req.user))
-    return res.status(401).send({ error: "Authentication error" });
-
+export const signoutAll: ReqAuthRequestHandler = async (
+  req,
+  res,
+  next,
+  user
+) => {
   if (req.body.all !== "true") return next();
 
-  try {
-    req.user.tokens = [];
-    const user = await req.user.save();
+  user.tokens = [];
+  const updatedUser = await user.save();
 
-    res.send({ user });
-  } catch (error) {
-    res.status(500).send({ error: error.toString() });
-  }
+  res.send({ user: updatedUser });
 };

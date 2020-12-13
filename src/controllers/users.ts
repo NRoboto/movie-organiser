@@ -1,30 +1,28 @@
 import { RequestHandler } from "express";
 import { User, UserDocument, isUser } from "../models/User";
+import { ReqAuthRequestHandler, UseAuthRequestHandler } from "./types";
 
-export const readSelf: RequestHandler = async (req, res) => {
-  if (!isUser(req.user))
-    return res.status(401).send({ error: "Authentication error" });
-
-  res.send(req.user);
+export const readSelf: ReqAuthRequestHandler = async (req, res, next, user) => {
+  res.send(user);
 };
 
-export const readUser: RequestHandler = async (req, res) => {
+export const readUser: UseAuthRequestHandler = async (req, res, next, user) => {
   const username = req.params.username;
 
-  try {
-    const user = await User.findOne({ username });
-    if (!user)
-      return res.status(404).send({ error: `User "${username}" not found.` });
+  const foundUser = await User.findOne({ username });
+  if (!foundUser)
+    return next({ message: `User "${username}" not found.`, status: 404 });
 
-    if (isUser(req.user) && req.user.username === username) res.send(user);
-    else res.send(user.getPublicDocument());
-  } catch (error) {
-    res.status(500).send({ error });
-  }
+  if (user?.username === username) res.send(foundUser);
+  else res.send(foundUser.getPublicDocument());
 };
 
-export const updateUser: RequestHandler = async (req, res) => {
-  // NOTE: Username in body should be ignored, instead it should be obtained from auth
+export const updateUser: ReqAuthRequestHandler = async (
+  req,
+  res,
+  next,
+  user
+) => {
   const updatableFields: (keyof UserDocument)[] = [
     "displayName",
     "password",
@@ -33,40 +31,29 @@ export const updateUser: RequestHandler = async (req, res) => {
     "location",
   ];
 
-  if (!isUser(req.user))
-    return res.status(401).send({ error: "Authentication error" });
-
-  try {
-    const updates: { [key in keyof UserDocument]?: any } = {};
-    for (const field of updatableFields) {
-      if (req.body[field]) updates[field] = req.body[field];
-    }
-
-    const user = Object.assign(req.user, updates);
-    user.save();
-
-    res.send({ user });
-  } catch (error) {
-    res.status(500).send({ error: error.toString() });
+  const updates: { [key in keyof UserDocument]?: any } = {};
+  for (const field of updatableFields) {
+    if (req.body[field]) updates[field] = req.body[field];
   }
+
+  const updatedUser = Object.assign(user, updates);
+  await updatedUser.save();
+
+  res.send({ user: updatedUser });
 };
 
-export const deleteUser: RequestHandler = async (req, res) => {
-  if (!isUser(req.user))
-    return res.status(401).send({ error: "Authentication error" });
+export const deleteUser: ReqAuthRequestHandler = async (
+  req,
+  res,
+  next,
+  user
+) => {
+  const deletedUser = await user.deleteOne();
 
-  const username = req.user.username;
+  if (!deletedUser)
+    return next({ message: "Unable to delete user", status: 500 });
 
-  try {
-    const deletedUser = await User.findOneAndDelete({ username });
-
-    if (!deletedUser)
-      return res.status(404).send({ error: `User "${username}" not found.` });
-
-    res.send(deletedUser);
-  } catch (error) {
-    res.status(500).send({ error: error.toString() });
-  }
+  res.send(deletedUser);
 };
 
 export const searchUser: RequestHandler = async (req, res, next) => {
@@ -78,14 +65,10 @@ export const searchUser: RequestHandler = async (req, res, next) => {
     value ? new RegExp(`.*${value}.*`, "i") : /.*/;
   const nameRegex = getSearchRegex(name);
 
-  try {
-    const users = await User.find({
-      $or: [{ username: nameRegex }, { displayName: nameRegex }],
-      location: getSearchRegex(location),
-    });
+  const users = await User.find({
+    $or: [{ username: nameRegex }, { displayName: nameRegex }],
+    location: getSearchRegex(location),
+  });
 
-    res.send(users.map((user) => user.getPublicDocument()));
-  } catch (error) {
-    res.status(500).send({ error: error.toString() });
-  }
+  res.send(users.map((user) => user.getPublicDocument()));
 };
