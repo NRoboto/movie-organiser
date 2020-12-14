@@ -31,10 +31,12 @@ export const updateUser: ReqAuthRequestHandler = async (
     "location",
   ];
 
-  const updates: { [key in keyof UserDocument]?: any } = {};
-  for (const field of updatableFields) {
-    if (req.body[field]) updates[field] = req.body[field];
-  }
+  const updates = updatableFields
+    .filter((field) => req.body[field])
+    .reduce((updates, field) => {
+      updates[field] = req.body[field];
+      return updates;
+    }, {} as { [key in keyof UserDocument]?: any });
 
   const updatedUser = Object.assign(user, updates);
   await updatedUser.save();
