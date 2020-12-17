@@ -1,8 +1,7 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
-import { User } from "../models";
-import { TokenObject } from "../models/User";
+import { User, TokenObject } from "../models";
 
 passport.use(
   new LocalStrategy({ session: false }, async (username, password, done) => {
