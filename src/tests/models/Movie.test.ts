@@ -1,5 +1,5 @@
-import { Movie } from "./Movie";
-import { checkRequiredForDoc, writeWithDoc } from "./common.testutil";
+import { Movie } from "../../models/Movie";
+import { checkRequiredForDoc, writeWithDoc } from "../fixtures/common.testutil";
 
 const movieDoc = {
   title: "The Truman Show",
@@ -18,7 +18,7 @@ const writeMovie = writeWithDoc(Movie, movieDoc);
 
 describe("Movie database", () => {
   beforeAll(async () => {
-    const { initMongoose } = await import("../db/init");
+    const { initMongoose } = await import("../../db/init");
     await initMongoose();
   });
 

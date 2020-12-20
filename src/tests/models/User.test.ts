@@ -1,5 +1,5 @@
-import { User } from "./User";
-import { checkRequiredForDoc, writeWithDoc } from "./common.testutil";
+import { User } from "../../models/User";
+import { checkRequiredForDoc, writeWithDoc } from "../fixtures/common.testutil";
 
 type UserDoc = {
   username?: string;
@@ -35,7 +35,7 @@ describe("User Model", () => {
 
 describe("User Database", () => {
   beforeAll(async () => {
-    const { initMongoose } = await import("../db/init");
+    const { initMongoose } = await import("../../db/init");
     await initMongoose();
   });
 
