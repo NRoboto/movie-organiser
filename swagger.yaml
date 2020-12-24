@@ -1,0 +1,308 @@
+openapi: 3.0.0
+info:
+  title: Movies Organiser API
+  version: 0.0.1
+
+tags:
+  - name: Users
+    description: Manage and view users
+  - name: Lists
+    description: Manage and view lists
+
+paths:
+  /signup:
+    post:
+      summary: Create a new user
+      tags: [Users]
+      requestBody:
+        required: true
+        description: User details
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "200":
+          $ref: "#/components/responses/JSWT"
+        "500":
+          $ref: "#/components/responses/500"
+
+  /login:
+    post:
+      summary: Login to account
+      tags: [Users]
+      requestBody:
+        required: true
+        description: Username and password
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  format: password
+              example:
+                username: Alice
+                password: password123
+      responses:
+        "200":
+          $ref: "#/components/responses/JSWT"
+        "401":
+          $ref: "#/components/responses/401"
+        "500":
+          $ref: "#/components/responses/500"
+
+  /signout:
+    post:
+      summary: Signout the user
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/Authentication"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required:
+                    - token
+                  properties:
+                    token:
+                      type: string
+                      summary: JSWT to log out
+                - type: object
+                  required:
+                    - all
+                  properties:
+                    all:
+                      type: string
+                      summary: If "true" all tokens will be signed out
+      responses:
+        "200":
+          description: The token(s) were signed out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/401"
+        "500":
+          $ref: "#/components/responses/500"
+
+  /user:
+    get:
+      summary: View own profile
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/Authentication"
+      responses:
+        "200":
+          description: Public and private data for user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/401"
+        "500":
+          $ref: "#/components/responses/500"
+    patch:
+      summary: Modify own profile
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/Authentication"
+      requestBody:
+        required: true
+        description: Updates to make to profile
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "200":
+          description: Public and private data for user after updates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/401"
+        "500":
+          $ref: "#/components/responses/500"
+    delete:
+      summary: Delete logged in user
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/Authentication"
+      responses:
+        "200":
+          description: Deleted profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/401"
+        "500":
+          $ref: "#/components/responses/500"
+
+  /user/{username}:
+    get:
+      summary: View user by username
+      tags: [Users]
+      parameters:
+        - type: object
+          allOf:
+            - $ref: "#/components/parameters/Authentication"
+            - name: Authentication
+              required: false
+        - name: username
+          in: path
+          description: The username to get the profile for
+          required: true
+      responses:
+        "200":
+          description: The private profile for the user if signed in, the public profile otherwise
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          $ref: "#/components/responses/UserNotFound"
+        "500":
+          $ref: "#/components/responses/500"
+
+  /users:
+    get:
+      summary: Search for a user by name and/or location
+      tags: [Users]
+      parameters:
+        - in: query
+          name: name
+          description: User name to search by
+        - in: query
+          name: location
+          description: Location to search by
+      responses:
+        "200":
+          description: Array of users returned by the search
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "500":
+          $ref: "#/components/responses/500"
+
+components:
+  schemas:
+    User:
+      type: object
+      summary: User document
+      required:
+        - username
+        - password
+        - tokens
+      properties:
+        username:
+          type: string
+          summary: Username must be unique
+          minlength: 3
+          maxlength: 20
+          example: alice
+        password:
+          type: string
+          format: password
+          writeOnly: true
+          minlength: 8
+          example: password123
+        gender:
+          type: string
+          example: Enby
+        age:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 120
+          example: 21
+        location:
+          type: string
+          example: Trondheim, Norway
+        tokens:
+          type: array
+          readOnly: true
+          items:
+            $ref: "#/components/schemas/Token"
+          summary: The tokens which are currently valid for user sign in.
+          example:
+            token: "string"
+            createdAt: "2020-12-24T16:11:44.098Z"
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          summary: When the user was created
+
+    Token:
+      type: object
+      summary: JSON Web Token response object
+      required:
+        - token
+        - createdAt
+      properties:
+        token:
+          type: string
+          summary: The JSON Web Token
+        createdAt:
+          type: string
+          format: date-time
+          summary: Date/time the token was created at
+
+    Error:
+      type: object
+      summary: Error response object with message
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          summary: The error message
+          example: Something went wrong
+  parameters:
+    Authentication:
+      name: Authentication
+      in: header
+      description: JSWT bearer token
+      required: true
+  responses:
+    401:
+      description: User isn't logged in
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    500:
+      description: Something went wrong
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    UserNotFound:
+      description: No user could be found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    JSWT:
+      description: JSWT for the new user
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Token"

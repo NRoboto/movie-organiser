@@ -1,5 +1,8 @@
+import fs from "fs";
 import express, { RequestHandler } from "express";
 import passport from "passport";
+import swaggerUi from "swagger-ui-express";
+import YAML from "yaml";
 import {
   readSelf,
   readUser,
@@ -113,6 +116,11 @@ router.delete("/list/:id", useReqAuthHandler(deleteList));
 
 // Movies
 router.get("/movie", getMovies);
+
+// Docs
+const swaggerDocument = YAML.parse(fs.readFileSync("swagger.yaml", "utf-8"));
+router.use("/docs", swaggerUi.serve);
+router.get("/docs", swaggerUi.setup(swaggerDocument));
 
 // Error handling
 const errHandler: express.ErrorRequestHandler = (err, _req, res, _next) => {
