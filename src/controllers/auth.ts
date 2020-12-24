@@ -1,10 +1,6 @@
 import { RequestHandler } from "express";
 import { User, isUser } from "../models";
-import {
-  ReqAuthRequestHandler,
-  UseAuthRequestHandler,
-  SigninRequestHandler,
-} from "./types";
+import { ReqAuthRequestHandler, SigninRequestHandler } from "./types";
 
 export const signin: SigninRequestHandler = async (req, res, next, user) => {
   res.send({
