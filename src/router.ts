@@ -24,6 +24,7 @@ import {
   UseAuthRequestHandler,
 } from "./controllers/types";
 
+// Authentication handlers
 export const useReqAuthHandler = (
   handler: ReqAuthRequestHandler
 ): RequestHandler => async (req, res, next) => {
@@ -80,6 +81,7 @@ export const useSigninHandler = (
   )(req, res, next);
 };
 
+// Router
 export const router = express.Router();
 
 // Users
@@ -90,10 +92,16 @@ router.post(
   useReqAuthHandler(signoutAll),
   useReqAuthHandler(signout)
 ); // If body doesn't contain { "all": true }, signout from token
-router.get("/user/", searchUser, useReqAuthHandler(readSelf)); // If no search query params, searchUser will pass handling to readUser
+
+router
+  .route("/user")
+  .get(useReqAuthHandler(readSelf))
+  .patch(useReqAuthHandler(updateUser))
+  .delete(useReqAuthHandler(deleteUser));
+
+router.get("/users", searchUser);
+
 router.get("/user/:username", useUseAuthHandler(readUser));
-router.patch("/user", useReqAuthHandler(updateUser));
-router.delete("/user", useReqAuthHandler(deleteUser));
 
 // Lists
 router.post("/list", useReqAuthHandler(createList));
@@ -106,6 +114,7 @@ router.delete("/list/:id", useReqAuthHandler(deleteList));
 // Movies
 router.get("/movie", getMovies);
 
+// Error handling
 const errHandler: express.ErrorRequestHandler = (err, _req, res, _next) => {
   res.status(err.status ?? 500).send({ error: err.message });
 };
