@@ -107,12 +107,18 @@ router.get("/users", searchUser);
 router.get("/user/:username", useUseAuthHandler(readUser));
 
 // Lists
-router.post("/list", useReqAuthHandler(createList));
-router.get("/list/:id", useUseAuthHandler(getList));
+router
+  .route("/list")
+  .get(useReqAuthHandler(getSelfLists))
+  .post(useReqAuthHandler(createList));
+
+router
+  .route("/list/:id")
+  .get(useUseAuthHandler(getList))
+  .patch(useReqAuthHandler(updateList))
+  .delete(useReqAuthHandler(deleteList));
+
 router.get("/user/:username/list", useUseAuthHandler(getUserLists));
-router.get("/list", useReqAuthHandler(getSelfLists));
-router.patch("/list/:id", useReqAuthHandler(updateList));
-router.delete("/list/:id", useReqAuthHandler(deleteList));
 
 // Movies
 router.get("/movie", getMovies);
