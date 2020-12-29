@@ -282,12 +282,6 @@ components:
           type: string
           summary: The error message
           example: Something went wrong
-  parameters:
-    Authentication:
-      name: Authentication
-      in: header
-      description: JSWT bearer token
-      required: true
   responses:
     401:
       description: User isn't logged in
