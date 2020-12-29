@@ -180,6 +180,9 @@ paths:
     get:
       summary: Search for a user by name and/or location
       tags: [Users]
+      security:
+        - {}
+        - bearerAuth: []
       parameters:
         - in: query
           name: name
