@@ -12,9 +12,11 @@ export type TokenObject = {
   iat: Number;
 };
 
-type TokenSchema = { token: string };
+export type TokenDocument = {
+  token: string;
+} & mongoose.Document;
 
-const tokenSchema = new mongoose.Schema(
+const tokenSchema = new mongoose.Schema<TokenDocument>(
   {
     token: {
       type: String,
@@ -37,7 +39,7 @@ export type UserDocument = {
   gender: string;
   age: number;
   location: string;
-  tokens: TokenSchema[];
+  tokens: TokenDocument[];
   isPassword: (pass: string) => Promise<boolean>;
   createToken: () => Promise<string>;
   getPublicDocument: () => { [key: string]: any };
