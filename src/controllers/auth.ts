@@ -5,6 +5,7 @@ import {
   NoAuthRequestHandler,
 } from "./types";
 import { OkDTO, RegisterDTO, TokenDTO } from "../DTOs";
+import { UserMapper } from "../mappers";
 
 export const signin: SigninRequestHandler<TokenDTO> = async (
   req,
@@ -13,31 +14,21 @@ export const signin: SigninRequestHandler<TokenDTO> = async (
   user
 ) => {
   const token = await user.createToken();
-
-  res.send({
-    token: token.token,
-    createdAt: token.createdAt!,
-  });
+  res.send(UserMapper.toTokenDTO(token));
 };
 
-export const signup: NoAuthRequestHandler<TokenDTO> = async (
+export const signup: NoAuthRequestHandler<TokenDTO, RegisterDTO> = async (
   req,
   res,
   next
 ) => {
-  const { username, password, gender, age, location } = req.body;
+  const { username } = req.body;
 
+  // TODO: Perhaps refactor into repository `exists` function?
   const user = await User.findOne({ username });
   if (user) return next({ message: "Email already in use", status: 422 });
 
-  const newUser = await new User({
-    username,
-    password,
-    gender,
-    age,
-    location,
-  }).save();
-
+  const newUser = await UserMapper.toDatabase(req.body);
   if (!newUser) return next({ message: "Error creating user", status: 500 });
 
   return await signin(req, res, next, newUser);
