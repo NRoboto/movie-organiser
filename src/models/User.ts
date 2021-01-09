@@ -14,7 +14,8 @@ export type TokenObject = {
 
 export type TokenDocument = {
   token: string;
-} & mongoose.Document;
+  createdAt?: string;
+};
 
 const tokenSchema = new mongoose.Schema<TokenDocument>(
   {
@@ -41,7 +42,7 @@ export type UserDocument = {
   location: string;
   tokens: TokenDocument[];
   isPassword: (pass: string) => Promise<boolean>;
-  createToken: () => Promise<string>;
+  createToken: () => Promise<TokenDocument>;
   getPublicDocument: () => { [key: string]: any };
   getLists: (
     page?: number,
@@ -183,10 +184,10 @@ userSchema.methods.createToken = async function () {
   const jwtObject: TokenObject = { sub: user.id, iat };
   const token = jwt.sign(jwtObject, process.env.JWT_SECRET!);
 
-  user.tokens = user.tokens.concat({ token });
+  user.tokens.push({ token });
   await user.save();
 
-  return token;
+  return user.tokens[0];
 };
 
 userSchema.methods.getLists = async function (
