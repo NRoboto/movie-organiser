@@ -39,3 +39,14 @@ export interface SigninRequestHandler<
     authedUser: UserDocument
   ): any;
 }
+export interface NoAuthRequestHandler<
+  ResBody = any,
+  ReqBody = any,
+  ReqQuery = Record<string, any>
+> {
+  (
+    req: Request<Record<string, string>, ResBody, ReqBody, ReqQuery>,
+    res: Response<ResBody>,
+    next: NextFunction
+  ): any;
+}
