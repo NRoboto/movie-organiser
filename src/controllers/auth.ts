@@ -1,14 +1,30 @@
-import { RequestHandler } from "express";
 import { User, isUser } from "../models";
-import { ReqAuthRequestHandler, SigninRequestHandler } from "./types";
+import {
+  ReqAuthRequestHandler,
+  SigninRequestHandler,
+  NoAuthRequestHandler,
+} from "./types";
+import { OkDTO, RegisterDTO, TokenDTO } from "../DTOs";
 
-export const signin: SigninRequestHandler = async (req, res, next, user) => {
+export const signin: SigninRequestHandler<TokenDTO> = async (
+  req,
+  res,
+  next,
+  user
+) => {
+  const token = await user.createToken();
+
   res.send({
-    token: await user.createToken(),
+    token: token.token,
+    createdAt: token.createdAt!,
   });
 };
 
-export const signup: RequestHandler = async (req, res, next) => {
+export const signup: NoAuthRequestHandler<TokenDTO> = async (
+  req,
+  res,
+  next
+) => {
   const { username, password, gender, age, location } = req.body;
 
   const user = await User.findOne({ username });
@@ -27,18 +43,26 @@ export const signup: RequestHandler = async (req, res, next) => {
   return await signin(req, res, next, newUser);
 };
 
-export const signout: ReqAuthRequestHandler = async (req, res, next, user) => {
+export const signout: ReqAuthRequestHandler<OkDTO> = async (
+  req,
+  res,
+  next,
+  user
+) => {
   const reqToken = req.body.token;
 
   if (!reqToken) return next({ message: "No token provided", status: 400 });
 
   user.tokens = user.tokens.filter((token) => token.token !== reqToken);
-  const updatedUser = await user.save();
+  await user.save();
 
-  res.send({ user: updatedUser });
+  res.send({
+    ok: true,
+    message: "Signed out successfully",
+  });
 };
 
-export const signoutAll: ReqAuthRequestHandler = async (
+export const signoutAll: ReqAuthRequestHandler<OkDTO> = async (
   req,
   res,
   next,
@@ -47,7 +71,10 @@ export const signoutAll: ReqAuthRequestHandler = async (
   if (req.body.all !== "true") return next();
 
   user.tokens = [];
-  const updatedUser = await user.save();
+  await user.save();
 
-  res.send({ user: updatedUser });
+  res.send({
+    ok: true,
+    message: "All sessions signed out successfully",
+  });
 };
