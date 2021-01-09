@@ -28,3 +28,5 @@ export interface PublicProfileDTO {
 export interface PrivateProfileDTO extends PublicProfileDTO {
   tokens: TokenDTO[];
 }
+
+export type ProfileDTO = PublicProfileDTO | PrivateProfileDTO;
