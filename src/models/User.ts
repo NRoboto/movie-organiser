@@ -41,6 +41,8 @@ export type UserDocument = {
   age: number;
   location: string;
   tokens: TokenDocument[];
+  createdAt?: string;
+
   isPassword: (pass: string) => Promise<boolean>;
   createToken: () => Promise<TokenDocument>;
   getPublicDocument: () => { [key: string]: any };
