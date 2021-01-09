@@ -2,7 +2,10 @@ import mongoose from "mongoose";
 import { isValidIMDBId } from "../utils/omdb";
 import { User, UserDocument, isUser } from "./User";
 
-export type MovieIdDocument = { movieId: string } & mongoose.Document;
+export type MovieIdDocument = {
+  movieId: string;
+  createdAt?: string;
+} & mongoose.Document;
 
 const movieIdSchema = new mongoose.Schema<MovieIdDocument>(
   {
