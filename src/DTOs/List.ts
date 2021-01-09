@@ -5,8 +5,8 @@ export interface MovieIdDTO {
 }
 
 export interface ListCreationDTO {
-  movieIds: string[];
-  isPublic: boolean;
+  movieIds?: string[];
+  isPublic?: boolean;
 }
 
 export interface ListDTO {
@@ -18,6 +18,13 @@ export interface ListDTO {
 }
 
 export interface ListModificationDTO {
-  add: string[];
-  remove: string[];
+  add?: string[];
+  remove?: string[];
+  // move?: string[];
+}
+
+export interface ListGetDTO {
+  itemsPerPage: number;
+  page: number;
+  sort: Record<string, any>;
 }
