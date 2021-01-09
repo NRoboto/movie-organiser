@@ -1,31 +1,28 @@
 import { RequestHandler } from "express";
 import mongoose from "mongoose";
+import { ListCreationDTO, ListDTO, ListModificationDTO, OkDTO } from "../DTOs";
 import { isUser, List, User } from "../models";
 import { ListDocument, MovieIdDocument } from "../models/List";
 import { ReqAuthRequestHandler, UseAuthRequestHandler } from "./types";
+import { ListMapper } from "../mappers";
 
-export const createList: ReqAuthRequestHandler = async (
+export const createList: ReqAuthRequestHandler<
+  ListDTO,
+  ListCreationDTO
+> = async (req, res, next, user) => {
+  const list = await ListMapper.toDatabase(req.body, user);
+
+  if (!list) return next({ message: "Unable to create list", status: 500 });
+
+  return res.send(ListMapper.toListDTO(list));
+};
+
+export const getList: UseAuthRequestHandler<ListDTO> = async (
   req,
   res,
   next,
   user
 ) => {
-  const { isPublic = true, ids = [] } = req.body;
-
-  const list = await new List({
-    createdBy: user._id,
-    movieIds: ids.map((id: string) => ({
-      movieId: id,
-    })),
-    isPublic,
-  }).save();
-
-  if (!list) return next({ message: "Unable to create list", status: 500 });
-
-  return res.send({ list });
-};
-
-export const getList: UseAuthRequestHandler = async (req, res, next, user) => {
   const id = req.params.id;
   if (!id) return next({ message: "Invalid id", status: 400 });
 
@@ -35,30 +32,17 @@ export const getList: UseAuthRequestHandler = async (req, res, next, user) => {
   if (!list)
     return next({ message: `List { id: ${id} } does not exist.`, status: 404 });
 
-  res.send(list);
+  return res.send(ListMapper.toListDTO(list));
 };
 
-const parseGetListQuery = (query: Record<string, any>) => {
-  const itemsPerPage = 5;
-  const page = typeof query.page === "string" ? parseInt(query.page) : 0;
-
-  const sort: { [key: string]: any } = {};
-  if (typeof query.sort === "string") {
-    const [sortBy, order] = query.sort.split("_");
-    sort[sortBy] = order === "asc" ? 1 : -1;
-  }
-
-  return { itemsPerPage, page, sort };
-};
-
-export const getUserLists: UseAuthRequestHandler = async (
+export const getUserLists: UseAuthRequestHandler<ListDTO[]> = async (
   req,
   res,
   next,
   user
 ) => {
   const username = req.params.username;
-  const { itemsPerPage, page, sort } = parseGetListQuery(req.query);
+  const { itemsPerPage, page, sort } = ListMapper.toListGetDTO(req.query);
 
   const lists = await User.getViewableLists(
     username,
@@ -68,32 +52,30 @@ export const getUserLists: UseAuthRequestHandler = async (
     user
   );
 
-  res.send({ lists });
+  res.send(lists.map(ListMapper.toListDTO));
 };
 
-export const getSelfLists: ReqAuthRequestHandler = async (
+export const getSelfLists: ReqAuthRequestHandler<ListDTO[]> = async (
   req,
   res,
   next,
   user
 ) => {
-  const { itemsPerPage, page, sort } = parseGetListQuery(req.query);
+  const { itemsPerPage, page, sort } = ListMapper.toListGetDTO(req.query);
 
   const lists = await user.getLists(page, itemsPerPage, sort, true);
   if (!lists) return next({ message: "Unable to get lists", status: 500 });
 
-  res.send({ lists });
+  res.send(lists.map(ListMapper.toListDTO));
 };
 
-export const updateList: ReqAuthRequestHandler = async (
-  req,
-  res,
-  next,
-  user
-) => {
-  const addArr: string[] | undefined = req.body.add;
-  const removeArr: string[] | undefined = req.body.remove;
-  // const moveArr: string[] | undefined = req.body.move;
+export const updateList: ReqAuthRequestHandler<
+  ListDTO,
+  ListModificationDTO
+> = async (req, res, next, user) => {
+  const addArr = req.body.add;
+  const removeArr = req.body.remove;
+  // const moveArr = req.body.move;
 
   const list = await List.findById(req.params.id);
 
@@ -112,10 +94,10 @@ export const updateList: ReqAuthRequestHandler = async (
 
   const newList = await list.save({ validateBeforeSave: true });
 
-  res.send({ list: newList });
+  res.send(ListMapper.toListDTO(newList));
 };
 
-export const deleteList: ReqAuthRequestHandler = async (
+export const deleteList: ReqAuthRequestHandler<OkDTO> = async (
   req,
   res,
   next,
@@ -129,5 +111,10 @@ export const deleteList: ReqAuthRequestHandler = async (
   if (list.deletedCount === 0)
     return next({ message: "List not found", status: 404 });
 
-  res.send(list);
+  res.send({
+    ok: true,
+    message: "List deleted successfully",
+  });
 };
+
+export const searchList: RequestHandler = async (req, res) => {};
