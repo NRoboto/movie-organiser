@@ -99,6 +99,8 @@ type UserModel = {
     sort?: { [key: string]: any },
     currentUser?: UserDocument
   ) => Promise<ListDocument[]>;
+  getByUsername: (username: string) => Promise<UserDocument | null>;
+  usernameExists: (username: string) => Promise<boolean>;
 } & mongoose.Model<UserDocument>;
 
 (userSchema.statics as UserModel).getByJwt = async (token) => {
@@ -125,7 +127,11 @@ type UserModel = {
   return await user.getLists(page, itemsPerPage, sort, showPrivate);
 };
 
+(userSchema.statics as UserModel).getByUsername = async (username: string) =>
+  await User.findOne({ username: username.toLowerCase() });
 
+(userSchema.statics as UserModel).usernameExists = async (username: string) =>
+  !!(await User.getByUsername(username));
 
 userSchema.methods.toJSON = function () {
   throw new Error("Model should not be serialised directly");
