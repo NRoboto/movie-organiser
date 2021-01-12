@@ -1,33 +1,13 @@
 import mongoose from "mongoose";
-import Filter from "bad-words";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import isEqual from "lodash.isequal";
-import { ListDocument, TokenDocument, TokenObject, tokenSchema } from "./";
+import Filter from "bad-words";
+import { UserDocument } from ".";
+import { TokenObject, tokenSchema } from "..";
 
 const filter = new Filter();
 
-export type UserDocument = {
-  username: string;
-  displayName?: string;
-  password: string;
-  gender: string;
-  age: number;
-  location: string;
-  tokens: TokenDocument[];
-  createdAt?: string;
-
-  isPassword: (pass: string) => Promise<boolean>;
-  createToken: () => Promise<TokenDocument>;
-  getLists: (
-    page?: number,
-    itemsPerPage?: number,
-    sort?: { [key: string]: any },
-    showPrivate?: boolean
-  ) => Promise<ListDocument[]>;
-} & mongoose.Document;
-
-const userSchema = new mongoose.Schema<UserDocument>(
+export const userSchema = new mongoose.Schema<UserDocument>(
   {
     username: {
       type: String,
@@ -89,49 +69,6 @@ userSchema.virtual("lists", {
   localField: "_id",
   foreignField: "createdBy",
 });
-
-type UserModel = {
-  getByJwt: (token: TokenObject) => Promise<UserDocument | null>;
-  getViewableLists: (
-    username: string,
-    page?: number,
-    itemsPerPage?: number,
-    sort?: { [key: string]: any },
-    currentUser?: UserDocument
-  ) => Promise<ListDocument[]>;
-  getByUsername: (username: string) => Promise<UserDocument | null>;
-  usernameExists: (username: string) => Promise<boolean>;
-} & mongoose.Model<UserDocument>;
-
-(userSchema.statics as UserModel).getByJwt = async (token) => {
-  const user = await User.findById(token.sub);
-
-  if (user?.tokens.some((t) => isEqual(jwt.decode(t.token), token)))
-    return user;
-
-  return null;
-};
-
-(userSchema.statics as UserModel).getViewableLists = async (
-  username,
-  page = 0,
-  itemsPerPage = 5,
-  sort,
-  currentUser
-) => {
-  const user = await User.findOne({ username });
-  if (!user) throw new Error(`User "${username}" not found.`);
-
-  const showPrivate = currentUser?.id === user.id;
-
-  return await user.getLists(page, itemsPerPage, sort, showPrivate);
-};
-
-(userSchema.statics as UserModel).getByUsername = async (username: string) =>
-  await User.findOne({ username: username.toLowerCase() });
-
-(userSchema.statics as UserModel).usernameExists = async (username: string) =>
-  !!(await User.getByUsername(username));
 
 userSchema.methods.toJSON = function () {
   throw new Error("Model should not be serialised directly");
@@ -198,8 +135,3 @@ userSchema.pre<UserDocument>("save", async function (next) {
 
   next();
 });
-
-export const User = mongoose.model<UserDocument, UserModel>("user", userSchema);
-
-export const isUser = (user: any): user is UserDocument =>
-  user && user.schema === User.schema;
