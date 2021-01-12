@@ -45,7 +45,6 @@ export type UserDocument = {
 
   isPassword: (pass: string) => Promise<boolean>;
   createToken: () => Promise<TokenDocument>;
-  getPublicDocument: () => { [key: string]: any };
   getLists: (
     page?: number,
     itemsPerPage?: number,
@@ -161,16 +160,7 @@ userSchema.methods.toJSON = function () {
   return user;
 };
 
-userSchema.methods.getPublicDocument = function () {
-  const user = this.toObject();
-  delete user.password;
-  delete user.__v;
-  delete user._id;
-  delete user.updatedAt;
-  delete user.age;
-  delete user.tokens;
 
-  return user;
 };
 
 userSchema.methods.isPassword = async function (pass) {
