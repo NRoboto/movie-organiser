@@ -3,35 +3,9 @@ import Filter from "bad-words";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import isEqual from "lodash.isequal";
-import { ListDocument } from "./List";
+import { ListDocument, TokenDocument, TokenObject, tokenSchema } from "./";
 
 const filter = new Filter();
-
-export type TokenObject = {
-  sub: string; // User ID
-  iat: Number;
-};
-
-export type TokenDocument = {
-  token: string;
-  createdAt?: string;
-};
-
-const tokenSchema = new mongoose.Schema<TokenDocument>(
-  {
-    token: {
-      type: String,
-      required: true,
-    },
-  },
-  {
-    timestamps: {
-      createdAt: true,
-      updatedAt: false,
-    },
-    _id: false,
-  }
-);
 
 export type UserDocument = {
   username: string;
