@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import isEqual from "lodash.isequal";
 import jwt from "jsonwebtoken";
-import { UserModel, userSchema } from ".";
+import { UserModel } from ".";
+import { userSchema } from "./schema";
 import { UserDocument } from "..";
 
 (userSchema.statics as UserModel).getByJwt = async (token) => {
