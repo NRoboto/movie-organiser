@@ -42,6 +42,7 @@ export const userSchema = new mongoose.Schema<UserDocument>(
       required: true,
       minlength: 8,
       trim: true,
+      select: false,
     },
     gender: {
       type: String,
@@ -57,10 +58,16 @@ export const userSchema = new mongoose.Schema<UserDocument>(
       type: String,
       required: false,
     },
-    tokens: [tokenSchema],
+    tokens: {
+      type: [tokenSchema],
+      select: false,
+    },
   },
   {
-    timestamps: true,
+    timestamps: {
+      createdAt: true,
+      updatedAt: false,
+    },
   }
 );
 

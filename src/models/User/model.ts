@@ -6,7 +6,7 @@ import { userSchema } from "./schema";
 import { UserDocument } from "..";
 
 (userSchema.statics as UserModel).getByJwt = async (token) => {
-  const user = await User.findById(token.sub);
+  const user = await User.findById(token.sub).select("+tokens");
 
   if (user?.tokens.some((t) => isEqual(jwt.decode(t.token), token)))
     return user;
