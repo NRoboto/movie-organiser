@@ -26,6 +26,7 @@ import {
   SigninRequestHandler,
   UseAuthRequestHandler,
 } from "./controllers/types";
+import { logger } from "./logger";
 
 // Authentication handlers
 export const useReqAuthHandler = (
@@ -130,6 +131,7 @@ router.get("/docs", swaggerUi.setup(swaggerDocument));
 
 // Error handling
 const errHandler: express.ErrorRequestHandler = (err, _req, res, _next) => {
+  logger.info(err);
   res.status(err.status ?? 500).send({ error: err.message });
 };
 
