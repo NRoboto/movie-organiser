@@ -58,8 +58,6 @@ export const signoutAll: ReqAuthRequestHandler<OkDTO> = async (
   next,
   user
 ) => {
-  if (req.body.all !== "true") return next();
-
   user.tokens = [];
   await user.save();
 

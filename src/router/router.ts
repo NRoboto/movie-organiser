@@ -33,11 +33,8 @@ export const router = express.Router();
 // Users
 router.post("/signup", signup);
 router.post("/login", useSigninHandler(signin));
-router.post(
-  "/signout",
-  useReqAuthHandler(signoutAll),
-  useReqAuthHandler(signout)
-); // If body doesn't contain { "all": true }, signout from token
+router.post("/signout", useReqAuthHandler(signout));
+router.post("/signout/all", useReqAuthHandler(signoutAll));
 
 router
   .route("/user")
