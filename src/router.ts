@@ -91,6 +91,7 @@ export const router = express.Router();
 // Users
 router.post("/signup", signup);
 router.post("/login", useSigninHandler(signin));
+// TODO: Change signoutAll into route "/signout/all"
 router.post(
   "/signout",
   useReqAuthHandler(signoutAll),
@@ -131,7 +132,7 @@ router.get("/docs", swaggerUi.setup(swaggerDocument));
 
 // Error handling
 const errHandler: express.ErrorRequestHandler = (err, _req, res, _next) => {
-  logger.info(err);
+  logger.warn(err);
   res.status(err.status ?? 500).send({ error: err.message });
 };
 

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import chalk from "chalk";
+import { logger } from "../logger";
 
 export const initMongoose = async () => {
   await mongoose.connect(process.env.MONGODB_URL!, {
@@ -10,7 +10,7 @@ export const initMongoose = async () => {
   });
 
   mongoose.connection.on("error", (err) => {
-    console.log(chalk.bgRed("Error"), err);
+    logger.fatal("Mongoose connection error", err);
   });
 
   return mongoose.STATES[mongoose.connection.readyState];

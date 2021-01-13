@@ -40,11 +40,7 @@ export const omdbRequest = async (params: Params) => {
     if (sanitisedParams[key]) reqUrl += `&${key}=${sanitisedParams[key]}`;
   }
 
-  console.log("reqUrl", reqUrl);
-
   const { data } = await axios.get(reqUrl);
-
-  console.log("data", data);
 
   if (data.Error) {
     throw new Error(data.Error);
