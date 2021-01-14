@@ -73,8 +73,14 @@ export const searchUser: NoAuthRequestHandler<PublicProfileDTO[]> = async (
 ) => {
   const { name, location } = req.query;
 
-  if (!name && !location) return next();
+  if (!name && !location)
+    return next({
+      message: "Can only search by name and/or location",
+      status: 400,
+    });
 
+  if (typeof name !== "string" || typeof location !== "string")
+    return next({ message: "Name and location must be strings", status: 400 });
 
   const users = await User.search(name, location);
 
