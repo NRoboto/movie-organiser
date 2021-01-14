@@ -29,7 +29,7 @@ export const readUser: UseAuthRequestHandler<ProfileDTO> = async (
 ) => {
   const username = req.params.username;
 
-  const foundUser = await User.findOne({ username });
+  const foundUser = await User.getByUsername(username);
   if (!foundUser)
     return next({ message: `User "${username}" not found.`, status: 404 });
 
