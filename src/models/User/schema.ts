@@ -12,35 +12,31 @@ export const userSchema = new mongoose.Schema<UserDocument>(
     username: {
       type: String,
       unique: true,
-      required: true,
-      minlength: 3,
-      maxlength: 20,
+      required: [true, "required"],
+      minlength: [3, "must be atleast 3 characters"],
+      maxlength: [20, "cannot be more than 20 characters"],
       trim: true,
-      validate(value: string) {
-        if (filter.isProfane(value))
-          throw new Error("Username cannot contain profanity.");
-
-        return true;
-      },
+      validate: [
+        async (value: string) => !filter.isProfane(value),
+        "cannot contain profanity",
+      ],
     },
     displayName: {
       type: String,
       unique: true,
-      required: false,
-      minlength: 3,
-      maxlength: 20,
+      required: [false, "required"],
+      minlength: [3, "must be atleast 3 characters"],
+      maxlength: [20, "cannot be more than 20 characters"],
       trim: true,
-      async validate(value: string) {
-        if (filter.isProfane(value))
-          throw new Error("Display name cannot contain profanity.");
-
-        return true;
-      },
+      validate: [
+        async (value: string) => !filter.isProfane(value),
+        "cannot contain profanity",
+      ],
     },
     password: {
       type: String,
-      required: true,
-      minlength: 8,
+      required: [true, "required"],
+      minlength: [8, "must be atleast 8 characters"],
       trim: true,
       select: false,
     },
@@ -51,8 +47,8 @@ export const userSchema = new mongoose.Schema<UserDocument>(
     age: {
       type: Number,
       required: false,
-      min: 0,
-      max: 120,
+      min: [0, "cannot be less than 0"],
+      max: [120, "cannot be greater than 120"],
     },
     location: {
       type: String,
