@@ -1,6 +1,4 @@
-export interface ErrorDTO {
-  error: string;
-}
+export type ErrorDTO = { errors: string[] };
 
 export interface OkDTO {
   ok: true;

@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { UserDocument } from "../models/User";
 
-type NextFunction = (err?: { message: string; status?: number }) => any;
+export type NextError = { message: string; status?: number };
+type NextFunction = (err?: NextError) => any;
 
 export interface ReqAuthRequestHandler<
   ResBody = any,

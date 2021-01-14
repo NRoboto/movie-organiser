@@ -68,4 +68,5 @@ const swaggerDocument = YAML.parse(fs.readFileSync("swagger.yaml", "utf-8"));
 router.use("/docs", swaggerUi.serve);
 router.get("/docs", swaggerUi.setup(swaggerDocument));
 
+// Error handling
 router.use(errHandler);
