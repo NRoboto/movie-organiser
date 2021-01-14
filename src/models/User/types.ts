@@ -19,6 +19,7 @@ export type UserDocument = {
     sort?: { [key: string]: any },
     showPrivate?: boolean
   ) => Promise<ListDocument[]>;
+  removeToken: (tokensOrAll: string[] | "all") => Promise<UserDocument>;
 } & mongoose.Document;
 
 export type UserModel = {

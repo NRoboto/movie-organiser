@@ -125,6 +125,15 @@ userSchema.methods.getLists = async function (
   return (user as any).lists;
 };
 
+userSchema.methods.removeToken = async function (tokensOrAll) {
+  const user = this;
+
+  if (tokensOrAll === "all") user.tokens = [];
+  else user.tokens = user.tokens.filter((t) => !tokensOrAll.includes(t.token));
+
+  return await user.save();
+};
+
 userSchema.pre<UserDocument>("save", async function (next) {
   const user = this;
 

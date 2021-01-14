@@ -1,4 +1,3 @@
-import { User, isUser } from "../models";
 import {
   ReqAuthRequestHandler,
   SigninRequestHandler,
@@ -35,11 +34,9 @@ export const signout: ReqAuthRequestHandler<OkDTO> = async (
   user
 ) => {
   const reqToken = req.body.token;
-
   if (!reqToken) return next({ message: "No token provided", status: 400 });
 
-  user.tokens = user.tokens.filter((token) => token.token !== reqToken);
-  await user.save();
+  await user.removeToken([reqToken]);
 
   res.send({
     ok: true,
@@ -53,8 +50,7 @@ export const signoutAll: ReqAuthRequestHandler<OkDTO> = async (
   next,
   user
 ) => {
-  user.tokens = [];
-  await user.save();
+  await user.removeToken("all");
 
   res.send({
     ok: true,
