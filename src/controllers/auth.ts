@@ -24,8 +24,8 @@ export const signup: NoAuthRequestHandler<TokenDTO, RegisterDTO> = async (
 ) => {
   const { username } = req.body;
 
-  if (await User.usernameExists(username))
-    return next({ message: "Username already in use", status: 422 });
+  // if (await User.usernameExists(username))
+  //   return next({ message: "Username already in use", status: 422 });
 
   const newUser = await UserMapper.toDatabase(req.body);
   if (!newUser) return next({ message: "Error creating user", status: 500 });

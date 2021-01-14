@@ -138,3 +138,13 @@ userSchema.pre<UserDocument>("save", async function (next) {
 
   next();
 });
+
+userSchema.post<UserDocument>("save", (error: any, doc: any, next: any) => {
+  if (error.name === "MongoError" && error.code === 11000)
+    return next(
+      new mongoose.Error.ValidatorError({
+        message: "A user with this username already exists",
+      })
+    );
+  next();
+});
