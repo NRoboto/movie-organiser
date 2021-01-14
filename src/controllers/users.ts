@@ -75,14 +75,8 @@ export const searchUser: NoAuthRequestHandler<PublicProfileDTO[]> = async (
 
   if (!name && !location) return next();
 
-  const getSearchRegex = (value: any) =>
-    value ? new RegExp(`.*${value}.*`, "i") : /.*/;
-  const nameRegex = getSearchRegex(name);
 
-  const users = await User.find({
-    $or: [{ username: nameRegex }, { displayName: nameRegex }],
-    location: getSearchRegex(location),
-  });
+  const users = await User.search(name, location);
 
   res.send(users.map(UserMapper.toPublicProfileDTO));
 };

@@ -35,4 +35,17 @@ import { UserDocument } from "..";
 (userSchema.statics as UserModel).usernameExists = async (username: string) =>
   !!(await User.getByUsername(username));
 
+(userSchema.statics as UserModel).search = async (name, location) => {
+  // TODO: Don't use regex, or sanitize, can be used for DDOS attacks
+  const getSearchRegex = (value: string) =>
+    value ? new RegExp(`.*${value}.*`, "i") : /.*/;
+
+  const nameRegex = getSearchRegex(name);
+
+  return await User.find({
+    $or: [{ username: nameRegex }, { displayName: nameRegex }],
+    location: getSearchRegex(location),
+  });
+};
+
 export const User = mongoose.model<UserDocument, UserModel>("user", userSchema);

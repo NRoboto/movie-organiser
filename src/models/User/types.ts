@@ -34,4 +34,5 @@ export type UserModel = {
   ) => Promise<ListDocument[]>;
   getByUsername: (username: string) => Promise<UserDocument | null>;
   usernameExists: (username: string) => Promise<boolean>;
+  search: (name: string, location: string) => Promise<UserDocument[]>;
 } & mongoose.Model<UserDocument>;
