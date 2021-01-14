@@ -45,24 +45,7 @@ export const updateUser: ReqAuthRequestHandler<PrivateProfileDTO> = async (
   next,
   user
 ) => {
-  const updatableFields: (keyof UserDocument)[] = [
-    "displayName",
-    "password",
-    "age",
-    "gender",
-    "location",
-  ];
-
-  const updates = updatableFields
-    .filter((field) => req.body[field])
-    .reduce((updates, field) => {
-      updates[field] = req.body[field];
-      return updates;
-    }, {} as { [key in keyof UserDocument]?: any });
-
-  const updatedUser = Object.assign(user, updates);
-  await updatedUser.save();
-
+  const updatedUser = await user.updateDetails(req.body);
   res.send(UserMapper.toPrivateProfileDTO(updatedUser));
 };
 

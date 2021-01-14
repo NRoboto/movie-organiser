@@ -20,6 +20,7 @@ export type UserDocument = {
     showPrivate?: boolean
   ) => Promise<ListDocument[]>;
   removeToken: (tokensOrAll: string[] | "all") => Promise<UserDocument>;
+  updateDetails: (updates: Record<string, string>) => Promise<UserDocument>;
 } & mongoose.Document;
 
 export type UserModel = {

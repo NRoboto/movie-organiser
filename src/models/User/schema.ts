@@ -125,6 +125,27 @@ userSchema.methods.getLists = async function (
   return (user as any).lists;
 };
 
+userSchema.methods.updateDetails = async function (updates) {
+  const user = this;
+
+  const updatableFields: readonly (keyof UserDocument)[] = [
+    "displayName",
+    "password",
+    "age",
+    "gender",
+    "location",
+  ];
+
+  const updatesToApply = updatableFields
+    .filter((field) => updates[field])
+    .reduce((updateObj, field) => {
+      updateObj[field] = updates[field];
+      return updateObj;
+    }, {} as { [key in keyof UserDocument]?: any });
+
+  return await Object.assign(user, updatesToApply).save();
+};
+
 userSchema.methods.removeToken = async function (tokensOrAll) {
   const user = this;
 
