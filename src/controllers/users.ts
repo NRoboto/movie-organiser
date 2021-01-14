@@ -33,12 +33,10 @@ export const readUser: UseAuthRequestHandler<ProfileDTO> = async (
   if (!foundUser)
     return next({ message: `User "${username}" not found.`, status: 404 });
 
-  const toProfileDTO =
-    user?.username === username
-      ? UserMapper.toPrivateProfileDTO
-      : UserMapper.toPublicProfileDTO;
+  if (user?.username === username)
+    return res.send(UserMapper.toPrivateProfileDTO(foundUser));
 
-  res.send(toProfileDTO(foundUser));
+  res.send(UserMapper.toPublicProfileDTO(foundUser));
 };
 
 export const updateUser: ReqAuthRequestHandler<PrivateProfileDTO> = async (
