@@ -36,10 +36,14 @@ export abstract class UserMapper {
     };
   }
 
-  public static toPrivateProfileDTO(user: UserDocument): PrivateProfileDTO {
+  public static async toPrivateProfileDTO(
+    user: UserDocument
+  ): Promise<PrivateProfileDTO> {
+    const userTokens = await User.findById(user._id).select("tokens");
+
     return {
       ...UserMapper.toPublicProfileDTO(user),
-      tokens: user.tokens.map(UserMapper.toTokenDTO),
+      tokens: userTokens?.tokens.map(UserMapper.toTokenDTO) ?? [],
     };
   }
 

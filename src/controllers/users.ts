@@ -18,7 +18,7 @@ export const readSelf: ReqAuthRequestHandler<PrivateProfileDTO> = async (
   next,
   user
 ) => {
-  res.send(UserMapper.toPrivateProfileDTO(user));
+  res.send(await UserMapper.toPrivateProfileDTO(user));
 };
 
 export const readUser: UseAuthRequestHandler<ProfileDTO> = async (
@@ -34,7 +34,7 @@ export const readUser: UseAuthRequestHandler<ProfileDTO> = async (
     return next({ message: `User "${username}" not found.`, status: 404 });
 
   if (user?.username === username)
-    return res.send(UserMapper.toPrivateProfileDTO(foundUser));
+    return res.send(await UserMapper.toPrivateProfileDTO(foundUser));
 
   res.send(UserMapper.toPublicProfileDTO(foundUser));
 };
@@ -46,7 +46,7 @@ export const updateUser: ReqAuthRequestHandler<PrivateProfileDTO> = async (
   user
 ) => {
   const updatedUser = await user.updateDetails(req.body);
-  res.send(UserMapper.toPrivateProfileDTO(updatedUser));
+  res.send(await UserMapper.toPrivateProfileDTO(updatedUser));
 };
 
 export const deleteUser: ReqAuthRequestHandler<OkDTO> = async (
