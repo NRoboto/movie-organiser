@@ -6,7 +6,9 @@ import { User, TokenObject } from "../models";
 passport.use(
   new LocalStrategy({ session: false }, async (username, password, done) => {
     try {
-      const user = await User.findOne({ username: username.toLowerCase() });
+      const user = await User.findOne({
+        username: username.toLowerCase(),
+      }).select("+password +tokens");
 
       if (!user)
         return done(null, false, { message: "Invalid username or password" });
