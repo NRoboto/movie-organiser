@@ -79,9 +79,6 @@ export const searchUser: NoAuthRequestHandler<PublicProfileDTO[]> = async (
       status: 400,
     });
 
-  if (typeof name !== "string" || typeof location !== "string")
-    return next({ message: "Name and location must be strings", status: 400 });
-
   const users = await User.search(name, location);
 
   res.send(users.map(UserMapper.toPublicProfileDTO));
