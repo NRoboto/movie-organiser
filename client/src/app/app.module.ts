@@ -15,7 +15,7 @@ import { ProfilePageComponent } from './pages/profile-page/profile-page.componen
 import { FriendsPageComponent } from './pages/friends-page/friends-page.component';
 import { ListPageComponent } from './pages/list-page/list-page.component';
 import { ListsPageComponent } from './pages/lists-page/lists-page.component';
-import { SearchsPageComponent } from './pages/searchs-page/searchs-page.component';
+import { SearchPageComponent } from './pages/search-page/search-page.component';
 import { UserSettingsPageComponent } from './pages/user-settings-page/user-settings-page.component';
 
 @NgModule({
@@ -30,7 +30,7 @@ import { UserSettingsPageComponent } from './pages/user-settings-page/user-setti
     FriendsPageComponent,
     ListPageComponent,
     ListsPageComponent,
-    SearchsPageComponent,
+    SearchPageComponent,
     UserSettingsPageComponent,
   ],
   imports: [
