@@ -24,7 +24,19 @@ export class SignupPageComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  signupSubmit() {
-    console.log(this.signupInfo);
+  async signupSubmit() {
+    try {
+      const response = await fetch('http://localhost:3000/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(this.signupInfo),
+      });
+
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
