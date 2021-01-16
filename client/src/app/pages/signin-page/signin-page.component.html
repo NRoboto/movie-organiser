@@ -1,0 +1,36 @@
+<div class="col text-center">
+  <h1>Login</h1>
+  <hr />
+</div>
+<div class="col">
+  <form (ngSubmit)="loginSubmit()">
+    <fieldset class="d-flex flex-column justify-content-center">
+      <div class="form-group">
+        <label for="input-user">Username</label>
+        <input
+          type="text"
+          id="input-user"
+          class="form-control"
+          placeholder="Username"
+          name="username"
+          [(ngModel)]="loginInfo.username"
+        />
+      </div>
+      <div class="form-group">
+        <label for="input-password">Password</label>
+        <input
+          type="password"
+          id="input-password"
+          class="form-control"
+          placeholder="Password"
+          name="password"
+          [(ngModel)]="loginInfo.password"
+        />
+      </div>
+      <div class="form-group" *ngIf="isInvalid">
+        <div class="invalid-feedback d-block">Invalid login details</div>
+      </div>
+      <button class="btn btn-primary">Login</button>
+    </fieldset>
+  </form>
+</div>
