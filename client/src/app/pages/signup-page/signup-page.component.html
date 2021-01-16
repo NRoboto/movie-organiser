@@ -1,1 +1,114 @@
-<p>signup-page works!</p>
+<div class="col text-center">
+  <h1>Sign up</h1>
+  <hr />
+</div>
+<div class="col">
+  <form #signup="ngForm" (ngSubmit)="signupSubmit()" autocomplete="off">
+    <fieldset class="d-flex flex-column justify-content-center">
+      <div class="form-group">
+        <label for="input-user">Username</label>
+        <input
+          type="text"
+          id="input-user"
+          class="form-control"
+          placeholder="Username"
+          name="username"
+          #username="ngModel"
+          [(ngModel)]="signupInfo.username"
+          required
+          minlength="3"
+          maxlength="20"
+        />
+        <div
+          class="invalid-feedback d-inline-block"
+          *ngIf="username.invalid && username.touched && username.dirty"
+        >
+          <p *ngIf="username.errors?.required">Username is required</p>
+          <p *ngIf="username.errors?.minlength">
+            Username must be atleast 3 characters
+          </p>
+          <p *ngIf="username.errors?.maxlength">
+            Username cannot be more than 20 characters
+          </p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="input-password">Password</label>
+        <input
+          type="password"
+          id="input-password"
+          class="form-control"
+          placeholder="Password"
+          name="password"
+          #password="ngModel"
+          [(ngModel)]="signupInfo.password"
+          required
+          minlength="8"
+        />
+        <div
+          class="invalid-feedback d-inline-block"
+          *ngIf="password.invalid && password.touched && password.dirty"
+        >
+          <p *ngIf="password.errors?.required">Password is required</p>
+          <p *ngIf="password.errors?.minlength">
+            Password must be atleast 8 characters
+          </p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="input-password">Age</label>
+        <input
+          type="number"
+          id="input-age"
+          class="form-control"
+          name="age"
+          [(ngModel)]="signupInfo.age"
+          min="0"
+          max="120"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="input-password">Gender</label>
+        <select
+          name="gender"
+          id="input-gender"
+          class="form-control"
+          [(ngModel)]="signupInfo.gender"
+        >
+          <option *ngFor="let gender of genders" [value]="gender">{{
+            gender
+          }}</option>
+        </select>
+
+        <input
+          type="text"
+          id="input-custom-gender"
+          class="form-control"
+          placeholder="Gender"
+          name="custom-gender"
+          [(ngModel)]="signupInfo.customGender"
+          *ngIf="signupInfo.gender === genders[genders.length - 1]"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="input-password">Location</label>
+        <input
+          type="text"
+          id="input-location"
+          class="form-control"
+          placeholder="Location"
+          name="location"
+          [(ngModel)]="signupInfo.location"
+        />
+      </div>
+      <!-- <div class="form-group" *ngIf="isInvalid">
+        <div class="invalid-feedback d-block">Invalid login details</div>
+      </div> -->
+      <button class="btn btn-primary">Login</button>
+    </fieldset>
+  </form>
+</div>
