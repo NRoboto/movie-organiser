@@ -37,6 +37,11 @@
 
 #### Front End
 
+- **Login page** (_"/login"_)
+  - Username, password
+- **Sign-up page** (_"/signup"_)
+  - Username (string, required), password (string, required), age (int), gender (\<female, male, non-binary, other\>), location (string) (**note: no email for data protection**)
+
 ## Planned
 
 #### REST API
@@ -63,10 +68,6 @@
   - If logged in, show feed
     - Feed shows recently updated lists by friends
   - If not logged in, show sign-up/login buttons
-- **Login page** (_"/login"_)
-  - Username, password
-- **Sign-up page** (_"/signup"_)
-  - Username (string, required), password (string, required), age (int), gender (\<female, male, non-binary, other\>), location (string) (**note: no email for data protection**)
 - **Profile page** (_"/profile" or "/profile/:id"_)
   - Name, info, and lists
 - **User lists page** (_"/profile/lists"_)
