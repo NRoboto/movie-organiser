@@ -17,6 +17,7 @@ import { ListPageComponent } from './pages/list-page/list-page.component';
 import { ListsPageComponent } from './pages/lists-page/lists-page.component';
 import { SearchPageComponent } from './pages/search-page/search-page.component';
 import { UserSettingsPageComponent } from './pages/user-settings-page/user-settings-page.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -39,6 +40,7 @@ import { UserSettingsPageComponent } from './pages/user-settings-page/user-setti
     BrowserAnimationsModule,
     CollapseModule.forRoot(),
     FormsModule,
+    HttpClientModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
