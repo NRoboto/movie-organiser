@@ -3,6 +3,7 @@ export type {
   RegisterDTO,
   TokenDTO,
   SigninDTO,
+  SignoutDTO,
   PublicProfileDTO,
   PrivateProfileDTO,
   ProfileDTO,

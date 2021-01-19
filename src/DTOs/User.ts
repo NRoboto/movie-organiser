@@ -16,6 +16,10 @@ export interface SigninDTO {
   token: string;
 }
 
+export interface SignoutDTO {
+  token: string;
+}
+
 export interface PublicProfileDTO {
   username: string;
   displayName: string;

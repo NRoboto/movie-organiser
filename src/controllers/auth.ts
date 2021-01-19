@@ -5,6 +5,7 @@ import {
 } from "./types";
 import { OkDTO, RegisterDTO, TokenDTO } from "../DTOs";
 import { UserMapper } from "../mappers";
+import { SignoutDTO } from "../DTOs/User";
 
 export const signin: SigninRequestHandler<TokenDTO> = async (
   req,
@@ -27,7 +28,7 @@ export const signup: NoAuthRequestHandler<TokenDTO, RegisterDTO> = async (
   return await signin(req, res, next, newUser);
 };
 
-export const signout: ReqAuthRequestHandler<OkDTO> = async (
+export const signout: ReqAuthRequestHandler<OkDTO, SignoutDTO> = async (
   req,
   res,
   next,

@@ -9,8 +9,7 @@ import { UserSignin, UserSignup } from '../models/User';
   providedIn: 'root',
 })
 export class AuthenticationService {
-  private readonly API_URL = 'http://localhost:3000/';
-  private readonly currentTokenSource = new ReplaySubject<Token>(1);
+  private readonly currentTokenSource = new ReplaySubject<TokenDTO>(1);
   public readonly currentToken$ = this.currentTokenSource.asObservable();
 
   constructor(private readonly http: HttpClient) {}
@@ -18,50 +17,42 @@ export class AuthenticationService {
   private setToken(token: Token) {
     console.log("Set token");
     
+  private setToken(token: TokenDTO) {
     localStorage.setItem('token', JSON.stringify(token));
     this.currentTokenSource.next(token);
   }
 
   private clearToken() {
-    localStorage.removeItem("token");
+    localStorage.removeItem('token');
     this.currentTokenSource.next(undefined);
   }
 
-  login(info: UserSignin) {
-    return this.http.post(`${this.API_URL}login`, info).pipe(
-      map((res) => {
-        const token = Token.fromResponse(res);
-        if (token) this.setToken(token);
-        return token;
-      })
-    );
+  login(info: UserSigninReq) {
+    return this.http
+      .post<TokenDTO>(`${environment.apiUrl}login`, info)
+      .pipe(map((token) => this.setToken(token)));
   }
 
-  signup(info: UserSignup) {
-    return this.http.post(`${this.API_URL}signup`, info).pipe(
-      map((res) => {
-        const token = Token.fromResponse(res);
-        if (token) this.setToken(token);
-        return token;
-      })
-    );
+  signup(info: UserSignupReq) {
+    return this.http
+      .post<TokenDTO>(`${environment.apiUrl}signup`, info)
+      .pipe(map((token) => this.setToken(token)));
   }
 
-  signout(token?: SignoutToken) {
-    if (!token)
-      this.currentToken$.subscribe(x => token = x).unsubscribe();
+  signout(token?: SignoutDTO) {
+    if (!token) this.currentToken$.subscribe((x) => (token = x)).unsubscribe();
 
-    return this.http.post(`${this.API_URL}signout`, token).pipe(
-      map((res: any) => {
-        if (res?.ok) this.clearToken();
+    return this.http.post<OkDTO>(`${environment.apiUrl}signout`, token).pipe(
+      map((res) => {
+        if (res.ok) this.clearToken();
       })
       );
   }
 
   signoutAll() {
-    return this.http.post(`${this.API_URL}signout/all`, {}).pipe(
-      map((res: any) => {
-        if (res?.ok) this.clearToken();
+    return this.http.post<OkDTO>(`${environment.apiUrl}signout/all`, {}).pipe(
+      map((res) => {
+        if (res.ok) this.clearToken();
       })
     );
   }
