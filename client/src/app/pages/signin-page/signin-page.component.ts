@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { UserSignin } from 'src/app/models/User';
+import { UserSigninReq } from 'src/app/models/User';
 import { AuthenticationService } from 'src/app/services/authentication.service';
+import { ProfileService } from 'src/app/services/profile.service';
 
 @Component({
   selector: 'app-signin-page',
@@ -11,24 +12,27 @@ export class SigninPageComponent implements OnInit {
   public isInvalid = false;
   public loginInfo = { username: '', password: '' };
 
-  constructor(private readonly auth: AuthenticationService) {}
+  constructor(
+    private readonly auth: AuthenticationService,
+    private readonly profile: ProfileService
+  ) {}
 
   ngOnInit(): void {}
 
-  async loginSubmit() {
-    const userLogin = new UserSignin(
+  loginSubmit() {
+    const userLogin = new UserSigninReq(
       this.loginInfo.username,
       this.loginInfo.password
     );
 
-    try {
-      this.auth.login(userLogin).subscribe((res) => {
-        console.log("login response", res);
-      }, (err) => {
+    this.auth.login(userLogin).subscribe(
+      (res) => {
+        console.log('login response', res);
+        this.profile.getProfile(userLogin.username).subscribe(console.log);
+      },
+      (err) => {
         console.error(err);
-      });
-    } catch (error) {
-      console.error(error);
-    }
+      }
+    );
   }
 }

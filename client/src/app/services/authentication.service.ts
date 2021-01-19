@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
-import { ReplaySubject } from 'rxjs';
-import { Token, SignoutToken } from 'src/app/models/Token';
-import { UserSignin, UserSignup } from '../models/User';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { map, first } from 'rxjs/operators';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { UserSigninReq, UserSignupReq } from '../models/User';
+import { environment } from 'src/environments/environment';
+import { TokenDTO, OkDTO, SignoutDTO } from '@DTOs';
 
 @Injectable({
   providedIn: 'root',
@@ -12,11 +13,19 @@ export class AuthenticationService {
   private readonly currentTokenSource = new ReplaySubject<TokenDTO>(1);
   public readonly currentToken$ = this.currentTokenSource.asObservable();
 
-  constructor(private readonly http: HttpClient) {}
+  private readonly authHeadersSource = new BehaviorSubject<
+    HttpHeaders | undefined
+  >(undefined);
+  public readonly authHeaders$ = this.authHeadersSource.asObservable();
 
-  private setToken(token: Token) {
-    console.log("Set token");
-    
+  constructor(private readonly http: HttpClient) {
+    this.currentToken$.subscribe((token) =>
+      this.authHeadersSource.next(
+        new HttpHeaders().set('Authorization', 'Bearer ' + token.token)
+      )
+    );
+  }
+
   private setToken(token: TokenDTO) {
     localStorage.setItem('token', JSON.stringify(token));
     this.currentTokenSource.next(token);
@@ -46,7 +55,7 @@ export class AuthenticationService {
       map((res) => {
         if (res.ok) this.clearToken();
       })
-      );
+    );
   }
 
   signoutAll() {
