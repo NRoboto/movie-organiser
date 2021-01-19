@@ -33,6 +33,7 @@ export abstract class UserMapper {
       age: user.age,
       location: user.location,
       createdAt: user.createdAt!,
+      isSelf: false,
     };
   }
 
@@ -44,6 +45,7 @@ export abstract class UserMapper {
     return {
       ...UserMapper.toPublicProfileDTO(user),
       tokens: userTokens?.tokens.map(UserMapper.toTokenDTO) ?? [],
+      isSelf: true,
     };
   }
 

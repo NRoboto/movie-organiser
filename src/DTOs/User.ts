@@ -23,10 +23,12 @@ export interface PublicProfileDTO {
   age?: number;
   location?: string;
   createdAt: string;
+  isSelf: boolean;
 }
 
 export interface PrivateProfileDTO extends PublicProfileDTO {
   tokens: TokenDTO[];
+  isSelf: true;
 }
 
 export type ProfileDTO = PublicProfileDTO | PrivateProfileDTO;
