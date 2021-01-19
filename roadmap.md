@@ -28,6 +28,11 @@
 
 #### Front End
 
+- **Login page** (_"/login"_)
+  - Username, password
+- **Sign-up page** (_"/signup"_)
+  - Username (string, required), password (string, required), age (int), gender (\<female, male, non-binary, other\>), location (string) (**note: no email for data protection**)
+
 ## In Progress
 
 #### REST API
@@ -37,10 +42,15 @@
 
 #### Front End
 
-- **Login page** (_"/login"_)
-  - Username, password
-- **Sign-up page** (_"/signup"_)
-  - Username (string, required), password (string, required), age (int), gender (\<female, male, non-binary, other\>), location (string) (**note: no email for data protection**)
+- **Profile page** (_"/profile" or "/profile/:id"_)
+  - Name, info, and lists
+- **Settings page** (_"/profile/settings"_)
+  - Update details
+  - Set information visibility
+  - Set default list visibility
+  - Delete account
+    - Modal pop-up for confirmation
+    - Require typing password to confirm
 
 ## Planned
 
@@ -68,8 +78,6 @@
   - If logged in, show feed
     - Feed shows recently updated lists by friends
   - If not logged in, show sign-up/login buttons
-- **Profile page** (_"/profile" or "/profile/:id"_)
-  - Name, info, and lists
 - **User lists page** (_"/profile/lists"_)
   - Lists for logged in user
 - **Individual list page** (_"/list/:id"_)
@@ -88,10 +96,3 @@
   - Same GET query string as for "Search list" CRUD operation
 - **Search movie page** (_"/search/movie"_)
   - Same GET query string as for OMDb wrapper search
-- **Settings page** (_"/profile/settings"_)
-  - Update details
-  - Set information visibility
-  - Set default list visibility
-  - Delete account
-    - Modal pop-up for confirmation
-    - Require typing password to confirm
