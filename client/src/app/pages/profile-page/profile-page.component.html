@@ -1,6 +1,21 @@
 <div *ngIf="(userProfile$ | async) as user; else loading">
-    <h2>{{user.username}}</h2>
-    {{user.location}}
+    <a routerLink="/profile/{{user.username}}">
+        <h1>{{user.displayName}} <small class="text-muted">({{user.username}})</small></h1>
+    </a>
+    <hr/>
+    <div class="container d-flex">
+        <div class="row">
+            <div class="col-12">
+                <div style="width: 100%; height: 100px; background-color: gray;"></div>
+            </div>
+            <div class="col-12">
+                <div class="row">{{user.location}}</div>
+                <div class="row">{{user.gender}}</div>
+                <div class="row">{{user.age}}</div>
+                <div class="row">{{user.createdAt}}</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <ng-template #loading>
